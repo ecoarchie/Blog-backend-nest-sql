@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { UsersPagination } from '../dtos/paginator';
-import { UserPaginatorOptions } from '../dtos/users-paginator';
+import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
 import { UsersService } from '../services/users.service';
 
@@ -14,10 +14,11 @@ export class UsersController {
 
   @Get()
   async findAll(
-    @Query() userPaginatorQuery: UserPaginatorOptions,
+    @Query() userPaginatorQuery: UserPaginator,
   ): Promise<UsersPagination> {
-    const userPaginatorOptions = new UserPaginatorOptions(userPaginatorQuery);
-    const users = await this.userQueryRepository.findAll(userPaginatorOptions);
+    console.log("🚀 ~ file: users.controller.ts:19 ~ userPaginatorQuery:", userPaginatorQuery)
+    // const userPaginatorOptions = new UserPaginatorOptions(userPaginatorQuery);
+    const users = await this.userQueryRepository.findAll(userPaginatorQuery);
     return users;
   }
 
