@@ -10,6 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { BanUserDto } from '../dtos/ban-user.dto';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { UsersPagination } from '../dtos/paginator';
 import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
@@ -47,12 +48,12 @@ export class UsersController {
     if (!deletedUserId) throw new NotFoundException();
   }
 
-  // @HttpCode(204)
-  // @Put(':id/ban')
-  // async banUnbanUser(
-  //   @Param('id') userId: string,
-  //   @Body() banUserDto: BanUserDto,
-  // ) {
-  //   await this.userService.banUnbanUser(userId, banUserDto);
-  // }
+  @HttpCode(204)
+  @Put(':id/ban')
+  async banUnbanUser(
+    @Param('id') userId: string,
+    @Body() banUserDto: BanUserDto,
+  ) {
+    await this.userService.banUnbanUser(userId, banUserDto);
+  }
 }

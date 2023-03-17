@@ -39,17 +39,18 @@ export class UsersQueryRepository {
     SELECT COUNT(id) FROM public.users
     WHERE login LIKE $1 AND email LIKE $2 AND ("isBanned" = ${banStatus}) 
     `;
-    const totalCount = await this.dataSource.query(totalCountQuery, [
+    const result = await this.dataSource.query(totalCountQuery, [
       searchLoginTerm,
       searchEmailTerm,
     ]);
+    const totalCount = Number(result[0].count);
 
     const pagesCount = Math.ceil(totalCount / userPaginatorOptions.pageSize);
     return {
       pagesCount,
       page: userPaginatorOptions.pageNumber,
       pageSize: userPaginatorOptions.pageSize,
-      totalCount: Number(totalCount[0].count),
+      totalCount,
       items: users.map(this.toUserDto),
     };
   }

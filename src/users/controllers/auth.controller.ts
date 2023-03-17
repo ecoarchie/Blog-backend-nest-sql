@@ -1,5 +1,17 @@
-import { BadRequestException, Body, Controller, Get, Headers, HttpCode, Ip, Post, Req, Res, UseGuards } from '@nestjs/common';
-import {Request, Response } from 'express';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  Ip,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { SkipThrottle } from '@nestjs/throttler';
 import { UsersService } from '../services/users.service';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
@@ -28,14 +40,11 @@ export class AuthController {
       authUserDto.loginOrEmail,
       authUserDto.password,
     );
+    console.log('🚀 ~ file: auth.controller.ts:31 ~ result:', result);
     if (!result) return res.sendStatus(401);
     const { accessToken, refreshToken } = result;
 
-    await this.sessionsService.createNewSession(
-      refreshToken,
-      ip,
-      browserTitle,
-    );
+    await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     res.status(200).send({ accessToken });
     // res.send(result);

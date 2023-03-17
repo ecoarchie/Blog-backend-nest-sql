@@ -8,33 +8,36 @@ import { CreateSessionDto } from '../dtos/create-session.dto';
 
 @Injectable()
 export class SessionsRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createNewSession(createSessionDto: CreateSessionDto) {
+  async createNewSession(createSessionDto: CreateSessionDto): Promise<void> {
     const sessionInsertQuery = `
     INSERT INTO public.sessions(
 	 ip, "browserTitle", "lastActiveDate", "deviceId", "tokenExpireDate", "userId")
 	VALUES ($1, $2, $3, $4, $5, $6)
-    `
+    `;
 
-    const values = [createSessionDto.ip, createSessionDto.browserTitle, createSessionDto.lastActiveDate, createSessionDto.deviceId, createSessionDto.tokenExpireDate, createSessionDto.userId]
-    await this.dataSource.query(sessionInsertQuery, values)
-    return ;
+    const values = [
+      createSessionDto.ip,
+      createSessionDto.browserTitle,
+      createSessionDto.lastActiveDate,
+      createSessionDto.deviceId,
+      createSessionDto.tokenExpireDate,
+      createSessionDto.userId,
+    ];
+    await this.dataSource.query(sessionInsertQuery, values);
+    return;
   }
 
-
-  async findUserByLoginOrEmail(login: string, email: string) {
-  const insQuery = `
+  async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
+    const insQuery = `
   INSERT INTO public.users(
 	login, password, email)
 	VALUES ($1, $2, $3);
   `;
-  const passHash = await this.hashPassword('123456');
-  const insVals = [login, passHash, email]
-  const insertRes = await this.dataSource.query(insQuery, insVals)
-  console.log("🚀 ~ file: sessions.repository.ts:37 ~ SessionsRepository ~ findUserByLoginOrEmail ~ insertRes:", insertRes)
+    const passHash = await this.hashPassword('123456');
+    const insVals = [login, passHash, email];
+    const insertRes = await this.dataSource.query(insQuery, insVals);
 
     const query = `
     SELECT * FROM public.users
@@ -43,16 +46,24 @@ export class SessionsRepository {
 
     const values = [login, email];
 
-    const res: User[] = await this.dataSource.query(query, values)
+    const res: User[] = await this.dataSource.query(query, values);
     const user = res[0];
     return res[0];
   }
 
-  async hashPassword(password: string) {
-    return await bcrypt.hash(password, 1)
+  async deleteAllUserSessions(userId: string): Promise<void> {
+    const deleteQuery = `
+      DELETE FROM public.sessions
+      WHERE "userId" = $1;
+    `;
+    await this.dataSource.query(deleteQuery, [userId]);
   }
 
-  async toUserDto (user: User) {
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, 1);
+  }
+
+  async toUserDto(user: User) {
     return {
       id: user.id,
       login: user.login,
@@ -61,6 +72,6 @@ export class SessionsRepository {
       isBanned: user.isBanned,
       banDate: user.banDate,
       banReason: user.banReason,
-    }
+    };
   }
 }

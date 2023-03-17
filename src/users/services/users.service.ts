@@ -6,12 +6,15 @@ import { UsersRepository } from '../repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
+import { BanUserDto } from '../dtos/ban-user.dto';
+import { SessionsRepository } from '../repositories/sessions.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersRepository: UsersRepository,
+    private readonly sessionsRepository: SessionsRepository,
   ) {}
 
   async loginUser(loginOrEmail: string, password: string) {
@@ -30,8 +33,32 @@ export class UsersService {
     }
     return null;
   }
+
   async createNewUser(dto: CreateUserInputDto) {
     return await this.usersRepository.createUser(dto);
+  }
+
+  async banUnbanUser(userId: string, banUserDto: BanUserDto) {
+    const user = await this.usersRepository.findUserById(userId);
+    user.isBanned = banUserDto.isBanned;
+    if (!banUserDto.isBanned) {
+      user.banReason = null;
+      user.banDate = null;
+    }
+    user.banReason = banUserDto.banReason;
+    user.banDate = new Date();
+    await this.usersRepository.updateUserBanInfo(user);
+
+    await this.sessionsRepository.deleteAllUserSessions(userId);
+    //TODO finish this function
+    // await this.commentsRepository.updateCommentsForBannedUser(
+    //   userId,
+    //   banUserDto.isBanned,
+    // );
+    // await this.postsRepository.updatePostsForBannedUser(
+    //   userId,
+    //   banUserDto.isBanned,
+    // );
   }
 
   async checkCredentials(user: User, password: string): Promise<boolean> {

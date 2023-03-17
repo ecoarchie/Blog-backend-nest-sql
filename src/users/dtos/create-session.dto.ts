@@ -4,5 +4,5 @@ export class CreateSessionDto {
   lastActiveDate: Date;
   deviceId: string;
   tokenExpireDate: Date;
-  userId: number;
+  userId: string;
 }

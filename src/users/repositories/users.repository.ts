@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { PassThrough } from 'stream';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
+import { SessionsRepository } from './sessions.repository';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    private readonly sessionsRepository: SessionsRepository,
+  ) {}
 
   async findUserByLoginOrEmail(login: string, email: string) {
     const query = `
@@ -55,22 +58,48 @@ export class UsersRepository {
 	    WHERE id = $1;
     `;
     await this.dataSource.query(deleteQuery, [id]);
+    await this.sessionsRepository.deleteAllUserSessions(user.id);
+
     return user[0].id;
   }
 
-  async hashPassword(password: string) {
-    return await bcrypt.hash(password, 1);
+  async findUserById(newUserId: string) {
+    const query = `
+    SELECT * FROM public.users
+    WHERE id = $1 
+    `;
+    const values = [newUserId];
+    const user = await this.dataSource.query(query, values);
+    return this.toPlainUserDto(user[0]);
   }
 
-  async toUserDto(user: User) {
+  async updateUserBanInfo(updatedUser: Partial<User>): Promise<void> {
+    const updateQuery = `
+      UPDATE public.users
+	      SET "isBanned"=$1, "banDate"=$2, "banReason"=$3
+	      WHERE id = $4;
+    `;
+    const updateResult = await this.dataSource.query(updateQuery, [
+      updatedUser.isBanned,
+      updatedUser.banDate,
+      updatedUser.banReason,
+      updatedUser.id,
+    ]);
+  }
+
+  private toPlainUserDto(user: User) {
     return {
       id: user.id,
       login: user.login,
       email: user.email,
       createdAt: user.createdAt,
       isBanned: user.isBanned,
-      banDate: user.banDate,
       banReason: user.banReason,
+      banDate: user.banDate,
     };
+  }
+
+  async hashPassword(password: string) {
+    return await bcrypt.hash(password, 1);
   }
 }
