@@ -51,6 +51,15 @@ export class SessionsRepository {
     ];
   }
 
+  async deleteSession(id: number) {
+    const query = `
+      DELETE FROM public.sessions
+        WHERE id=$1
+    `;
+
+    await this.dataSource.query(query, [id]);
+  }
+
   async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
     const insQuery = `
   INSERT INTO public.users(
@@ -81,7 +90,7 @@ export class SessionsRepository {
     await this.dataSource.query(deleteQuery, [userId]);
   }
 
-  async verifyToken(token: string): Promise<Session | null> {
+  async verifySessionByToken(token: string): Promise<Session | null> {
     try {
       const tokenData: any = jwt.verify(token, process.env.SECRET);
       if (tokenData.exp < Date.now() / 1000) {

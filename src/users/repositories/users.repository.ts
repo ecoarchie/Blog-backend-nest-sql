@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
+import { add } from 'date-fns';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { SessionsRepository } from './sessions.repository';
@@ -113,6 +115,21 @@ export class UsersRepository {
     ]);
   }
 
+  async setNewPasswordRecoveryCode(user: User) {
+    const query = `
+      UPDATE public.users
+        SET "passwordRecoveryCode"=$1, "passwordRecoveryExpirationDate"=$2, "passwordRecoveryCodeIsUsed"=$3
+        WHERE id=$4
+    `;
+    const values = [
+      user.passwordRecoveryCode,
+      user.passwordRecoveryExpirationDate,
+      user.passwordRecoveryCodeIsUsed,
+      user.id,
+    ];
+    await this.dataSource.query(query, values);
+  }
+
   async updateEmailConfirmationCode(
     code: string,
     userId: string,
@@ -138,6 +155,16 @@ export class UsersRepository {
     return user.length !== 0 ? user[0] : null;
   }
 
+  async findUserByRecoveryCode(code: string): Promise<User> {
+    const query = `
+    SELECT * FROM public.users
+    WHERE "passwordRecoveryCode" = $1 
+    `;
+    const values = [code];
+    const user = await this.dataSource.query(query, values);
+    return user.length !== 0 ? user[0] : null;
+  }
+
   async setEmailIsConfirmedToTrue(userId: string): Promise<void> {
     const updateQuery = `
       UPDATE public.users
@@ -145,6 +172,35 @@ export class UsersRepository {
 	      WHERE id = $1;
     `;
     const res = await this.dataSource.query(updateQuery, [userId]);
+  }
+
+  async saveUser(user: User): Promise<void> {
+    const query = `
+      UPDATE public.users
+	      SET login=$1, email=$2, "passwordHash"=$3, "createdAt"=$4, "isBanned"=$5, "banDate"=$6, 
+          "banReason"=$7, "confirmationCode"=$8, "confirmationCodeExpirationDate"=$9,
+          "confirmationCodeIsConfirmed"=$10, "passwordRecoveryCode"=$11, "passwordRecoveryExpirationDate"=$12,
+          "passwordRecoveryCodeIsUsed"=$13
+        WHERE id=$14;
+    `;
+    const values = [
+      user.login,
+      user.email,
+      user.passwordHash,
+      user.createdAt,
+      user.isBanned,
+      user.banDate,
+      user.banReason,
+      user.confirmationCode,
+      user.confirmationCodeExpirationDate,
+      user.confirmationCodeIsConfirmed,
+      user.passwordRecoveryCode,
+      user.passwordRecoveryExpirationDate,
+      user.passwordRecoveryCodeIsUsed,
+      user.id,
+    ];
+
+    const result = await this.dataSource.query(query, values);
   }
 
   private toPlainUserDto(user: User) {

@@ -46,7 +46,7 @@ export class AuthService {
     ip: string,
     browserTitle: string,
   ): Promise<{ newAccessToken: string; newRefreshToken: string }> {
-    const validSession = await this.sessionsRepository.verifyToken(
+    const validSession = await this.sessionsRepository.verifySessionByToken(
       refreshToken,
     );
     if (!validSession) throw new UnauthorizedException();

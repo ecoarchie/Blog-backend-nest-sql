@@ -126,26 +126,26 @@ export class AuthController {
     res.status(200).send({ accessToken: newAccessToken });
   }
 
-  // @SkipThrottle()
-  // @Post('logout')
-  // async logout(@Req() req: Request, @Res() res: Response) {
-  //   const refreshToken = req.cookies?.refreshToken;
-  //   if (!refreshToken) return res.sendStatus(401);
+  @SkipThrottle()
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) return res.sendStatus(401);
 
-  //   await this.usersService.logoutUser(refreshToken);
-  //   res.sendStatus(204);
-  // }
+    await this.usersService.logoutUser(refreshToken);
+    res.sendStatus(204);
+  }
 
-  // @HttpCode(204)
-  // @Post('password-recovery')
-  // async recoverPassword(@Body() emailDto: EmailDto) {
-  //   const email = emailDto.email;
-  //   await this.usersService.recoverPassword(email);
-  // }
+  @HttpCode(204)
+  @Post('password-recovery')
+  async recoverPassword(@Body() emailDto: EmailDto) {
+    const email = emailDto.email;
+    await this.usersService.recoverPassword(email);
+  }
 
-  // @HttpCode(204)
-  // @Post('new-password')
-  // async confirmNewPassword(@Body() newPasswordDto: NewPasswordDto) {
-  //   await this.usersService.updateRecoveryCodeAndPassword(newPasswordDto);
-  // }
+  @HttpCode(204)
+  @Post('new-password')
+  async confirmNewPassword(@Body() newPasswordDto: NewPasswordDto) {
+    await this.usersService.updateRecoveryCodeAndPassword(newPasswordDto);
+  }
 }
