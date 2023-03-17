@@ -1,18 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { JwtService } from './jwt.service';
 import { UsersRepository } from '../repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { BanUserDto } from '../dtos/ban-user.dto';
 import { SessionsRepository } from '../repositories/sessions.repository';
+import { JwtService } from '../../utils/jwt.service';
+import { EmailService } from '../../utils/email.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
     private readonly usersRepository: UsersRepository,
     private readonly sessionsRepository: SessionsRepository,
   ) {}
@@ -39,15 +40,7 @@ export class UsersService {
   }
 
   async banUnbanUser(userId: string, banUserDto: BanUserDto) {
-    const user = await this.usersRepository.findUserById(userId);
-    user.isBanned = banUserDto.isBanned;
-    if (!banUserDto.isBanned) {
-      user.banReason = null;
-      user.banDate = null;
-    }
-    user.banReason = banUserDto.banReason;
-    user.banDate = new Date();
-    await this.usersRepository.updateUserBanInfo(user);
+    await this.usersRepository.updateUserBanInfo(userId, banUserDto);
 
     await this.sessionsRepository.deleteAllUserSessions(userId);
     //TODO finish this function
@@ -59,6 +52,31 @@ export class UsersService {
     //   userId,
     //   banUserDto.isBanned,
     // );
+  }
+
+  async sendEmailConfirmation(userId: string) {
+    const user = await this.usersRepository.findUserById(userId);
+    try {
+      await this.emailService.sendEmailConfirmationMessage(user);
+    } catch (error) {
+      console.log('Could not send email!');
+      console.log(error);
+      return;
+    }
+  }
+
+  async confirmEmail(code: string): Promise<boolean> {
+    const user = await this.usersRepository.findUserByConfirmCode(code);
+    if (
+      !user ||
+      user.confirmationCode !== code ||
+      user.confirmationCodeExpirationDate < new Date() ||
+      user.confirmationCodeIsConfirmed
+    ) {
+      return false;
+    }
+    await this.usersRepository.setEmailIsConfirmedToTrue(user.id);
+    return true;
   }
 
   async checkCredentials(user: User, password: string): Promise<boolean> {

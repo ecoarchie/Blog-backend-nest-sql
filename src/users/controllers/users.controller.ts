@@ -9,15 +9,18 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BanUserDto } from '../dtos/ban-user.dto';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { UsersPagination } from '../dtos/paginator';
 import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
+import { BasicAuthGuard } from '../guards/basic.auth.guard';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
 import { UsersRepository } from '../repositories/users.repository';
 import { UsersService } from '../services/users.service';
 
+@UseGuards(BasicAuthGuard)
 @Controller('sa/users')
 export class UsersController {
   constructor(

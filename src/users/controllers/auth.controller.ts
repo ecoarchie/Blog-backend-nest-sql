@@ -20,6 +20,7 @@ import { NewPasswordDto } from '../dtos/new-password.dto';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
 import { AuthUserDto } from '../dtos/aurh-user.dto';
 import { SessionsService } from '../services/sessions.service';
+import { BearerAuthGuard } from '../guards/bearer.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -50,48 +51,48 @@ export class AuthController {
     // res.send(result);
   }
 
-  // @SkipThrottle()
-  // @UseGuards(BearerAuthGuard)
-  // @Get('me')
-  // async getCurrentUserInfo(@Req() req: Request) {
-  //   const user = await this.usersQueryRepo.findUserById(req.user.id);
-  //   return {
-  //     email: user.email,
-  //     login: user.login,
-  //     userId: req.user.id,
-  //   };
-  // }
+  @SkipThrottle()
+  @UseGuards(BearerAuthGuard)
+  @Get('me')
+  async getCurrentUserInfo(@Req() req: Request) {
+    const user = await this.usersQueryRepo.findUserById(req.user.id);
+    return {
+      email: user.email,
+      login: user.login,
+      userId: req.user.id,
+    };
+  }
 
-  // @HttpCode(204)
-  // @Post('registration')
-  // async registerUser(@Body() createUserDto: CreateUserInputDto) {
-  //   const user = await this.usersQueryRepo.findUserByLoginOrEmail(
-  //     createUserDto.login,
-  //     createUserDto.email,
-  //   );
-  //   if (user) {
-  //     const errorField = user.login === createUserDto.login ? 'login' : 'email';
-  //     throw new BadRequestException({
-  //       message: `User with this ${errorField} is already registered`,
-  //       field: `${errorField}`,
-  //     });
-  //   }
-  //   const newUserId = await this.usersService.createNewUser(createUserDto);
-  //   await this.usersService.sendEmailConfirmation(newUserId);
-  // }
+  @HttpCode(204)
+  @Post('registration')
+  async registerUser(@Body() createUserDto: CreateUserInputDto) {
+    const user = await this.usersQueryRepo.findUserByLoginOrEmail(
+      createUserDto.login,
+      createUserDto.email,
+    );
+    if (user) {
+      const errorField = user.login === createUserDto.login ? 'login' : 'email';
+      throw new BadRequestException({
+        message: `User with this ${errorField} is already registered`,
+        field: `${errorField}`,
+      });
+    }
+    const newUserId = await this.usersService.createNewUser(createUserDto);
+    await this.usersService.sendEmailConfirmation(newUserId);
+  }
 
-  // @HttpCode(204)
-  // @Post('registration-confirmation')
-  // async comfirmRegistration(@Body('code') confirmationCode: string) {
-  //   const result = await this.usersService.confirmEmail(confirmationCode);
-  //   if (!result) {
-  //     throw new BadRequestException({
-  //       message:
-  //         'Confirmation code is incorrect, expired or already been applied',
-  //       field: 'code',
-  //     });
-  //   }
-  // }
+  @HttpCode(204)
+  @Post('registration-confirmation')
+  async comfirmRegistration(@Body('code') confirmationCode: string) {
+    const result = await this.usersService.confirmEmail(confirmationCode);
+    if (!result) {
+      throw new BadRequestException({
+        message:
+          'Confirmation code is incorrect, expired or already been applied',
+        field: 'code',
+      });
+    }
+  }
 
   // @HttpCode(204)
   // @Post('registration-email-resending')

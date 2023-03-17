@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { SessionsRepository } from './sessions.repository';
+import { BanUserDto } from '../dtos/ban-user.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -13,7 +14,7 @@ export class UsersRepository {
     private readonly sessionsRepository: SessionsRepository,
   ) {}
 
-  async findUserByLoginOrEmail(login: string, email: string) {
+  async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
     const query = `
     SELECT * FROM public.users
     WHERE login = $1 OR email = $2
@@ -26,7 +27,7 @@ export class UsersRepository {
     return res[0];
   }
 
-  async createUser(dto: CreateUserInputDto) {
+  async createUser(dto: CreateUserInputDto): Promise<User['id']> {
     const insQuery = `
   INSERT INTO public.users(
 	login, "passwordHash", email)
@@ -63,28 +64,62 @@ export class UsersRepository {
     return user[0].id;
   }
 
-  async findUserById(newUserId: string) {
+  async findUserById(newUserId: string): Promise<User> {
     const query = `
     SELECT * FROM public.users
     WHERE id = $1 
     `;
     const values = [newUserId];
     const user = await this.dataSource.query(query, values);
-    return this.toPlainUserDto(user[0]);
+    return user[0];
   }
 
-  async updateUserBanInfo(updatedUser: Partial<User>): Promise<void> {
+  async updateUserBanInfo(
+    userId: string,
+    banUserDto: BanUserDto,
+  ): Promise<void> {
+    let isBanned: boolean;
+    let banReason: string;
+    let banDate: Date;
+
+    isBanned = banUserDto.isBanned;
+    if (!banUserDto.isBanned) {
+      banReason = null;
+      banDate = null;
+    } else {
+      banReason = banUserDto.banReason;
+      banDate = new Date();
+    }
     const updateQuery = `
       UPDATE public.users
 	      SET "isBanned"=$1, "banDate"=$2, "banReason"=$3
 	      WHERE id = $4;
     `;
     const updateResult = await this.dataSource.query(updateQuery, [
-      updatedUser.isBanned,
-      updatedUser.banDate,
-      updatedUser.banReason,
-      updatedUser.id,
+      isBanned,
+      banDate,
+      banReason,
+      userId,
     ]);
+  }
+
+  async findUserByConfirmCode(code: string): Promise<User> {
+    const query = `
+    SELECT * FROM public.users
+    WHERE "confirmationCode" = $1 
+    `;
+    const values = [code];
+    const user = await this.dataSource.query(query, values);
+    return user.length !== 0 ? user[0] : null;
+  }
+
+  async setEmailIsConfirmedToTrue(userId: string): Promise<void> {
+    const updateQuery = `
+      UPDATE public.users
+	      SET "confirmationCodeIsConfirmed"=TRUE
+	      WHERE id = $1;
+    `;
+    const res = await this.dataSource.query(updateQuery, [userId]);
   }
 
   private toPlainUserDto(user: User) {

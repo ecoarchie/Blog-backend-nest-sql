@@ -65,6 +65,24 @@ export class UsersQueryRepository {
     return this.toUserDto(user[0]);
   }
 
+  async getUserLoginById(id: string): Promise<User['login']> {
+    const user = await this.findUserById(id);
+    return user.login;
+  }
+
+  async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
+    const query = `
+    SELECT * FROM public.users
+    WHERE login = $1 OR email = $2
+    `;
+
+    const values = [login, email];
+
+    const res: User[] = await this.dataSource.query(query, values);
+    const user = res[0];
+    return res[0];
+  }
+
   private toUserDto(user: User) {
     return {
       id: user.id,

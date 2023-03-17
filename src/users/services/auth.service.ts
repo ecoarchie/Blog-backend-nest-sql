@@ -3,9 +3,7 @@ import { JwtService } from './jwt.service';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
   async validateUserBasic(authorization: string | null): Promise<boolean> {
     if (!authorization) {
       throw new UnauthorizedException();
