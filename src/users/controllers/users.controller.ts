@@ -1,14 +1,27 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { UsersPagination } from '../dtos/paginator';
 import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
+import { UsersRepository } from '../repositories/users.repository';
 import { UsersService } from '../services/users.service';
 
 @Controller('sa/users')
 export class UsersController {
-    constructor(
-    private readonly userQueryRepository: UsersQueryRepository,
+  constructor(
+    private readonly usersQueryRepository: UsersQueryRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly userService: UsersService,
   ) {}
 
@@ -16,25 +29,23 @@ export class UsersController {
   async findAll(
     @Query() userPaginatorQuery: UserPaginator,
   ): Promise<UsersPagination> {
-    console.log("🚀 ~ file: users.controller.ts:19 ~ userPaginatorQuery:", userPaginatorQuery)
     // const userPaginatorOptions = new UserPaginatorOptions(userPaginatorQuery);
-    const users = await this.userQueryRepository.findAll(userPaginatorQuery);
+    const users = await this.usersQueryRepository.findAll(userPaginatorQuery);
     return users;
   }
 
   @Post()
   async create(@Body() dto: CreateUserInputDto) {
     const newUserId = await this.userService.createNewUser(dto);
-    console.log("🚀 ~ file: users.controller.ts:27 ~ UsersController ~ create ~ newUserId:", newUserId)
-    return this.userQueryRepository.findUserById(newUserId);
+    return this.usersQueryRepository.findUserById(newUserId);
   }
 
-  // @HttpCode(204)
-  // @Delete(':id')
-  // async delete(@Param('id') id: string) {
-  //   const result = await this.userQueryRepository.deleteUserById(id);
-  //   if (!result) throw new NotFoundException();
-  // }
+  @HttpCode(204)
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    const deletedUserId = await this.usersRepository.deleteUserById(id);
+    if (!deletedUserId) throw new NotFoundException();
+  }
 
   // @HttpCode(204)
   // @Put(':id/ban')

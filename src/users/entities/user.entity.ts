@@ -1,12 +1,11 @@
 import * as bcrypt from 'bcrypt';
 
 export class User {
-
-  id: number;
+  id: string;
 
   login: string;
 
-  password: string;
+  passwordHash: string;
 
   email: string;
 

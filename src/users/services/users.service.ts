@@ -9,10 +9,10 @@ import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 
 @Injectable()
 export class UsersService {
-constructor(
-  private readonly jwtService: JwtService,
-  private readonly usersRepository: UsersRepository
-) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
   async loginUser(loginOrEmail: string, password: string) {
     const user = await this.usersRepository.findUserByLoginOrEmail(
@@ -34,9 +34,8 @@ constructor(
     return await this.usersRepository.createUser(dto);
   }
 
-   async checkCredentials(user: User, password: string): Promise<boolean> {
-        const match = await bcrypt.compare(password, user.password);
+  async checkCredentials(user: User, password: string): Promise<boolean> {
+    const match = await bcrypt.compare(password, user.passwordHash);
     return match ? true : false;
-   }
-
+  }
 }

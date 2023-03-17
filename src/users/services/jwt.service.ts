@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class JwtService {
-  async createJwtAccessToken(userId: number) {
+  async createJwtAccessToken(userId: string) {
     const token = jwt.sign({ userId: userId }, process.env.SECRET, {
       expiresIn: '3h',
     });
     return token;
   }
 
-  async createJwtRefresh(userId: number, deviceId: string) {
+  async createJwtRefresh(userId: string, deviceId: string) {
     const token = jwt.sign({ userId, deviceId }, process.env.SECRET, {
       expiresIn: '6h',
     });
