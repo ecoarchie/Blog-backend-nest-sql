@@ -30,24 +30,4 @@ export class JwtService {
     const tokenRes: any = jwt.verify(refreshToken, process.env.SECRET);
     return tokenRes.exp;
   }
-
-  // async verifyToken(token: string): Promise<SessionDocument | null> {
-  //   try {
-  //     const tokenData: any = jwt.verify(token, process.env.SECRET);
-  //     if (tokenData.exp < Date.now() / 1000) {
-  //       return null;
-  //     }
-  //     const session = await this.sessionModel
-  //       .findOne()
-  //       .and([
-  //         { lastActiveDate: new Date(tokenData.iat * 1000) },
-  //         { deviceId: tokenData.deviceId },
-  //         { userId: tokenData.userId },
-  //       ]);
-  //     return session;
-  //   } catch (error) {
-  //     console.log(error);
-  //     return null;
-  //   }
-  // }
 }

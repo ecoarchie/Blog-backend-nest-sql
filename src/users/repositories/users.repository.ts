@@ -74,6 +74,16 @@ export class UsersRepository {
     return user[0];
   }
 
+  async findUserByEmail(email: string): Promise<User> {
+    const query = `
+    SELECT * FROM public.users
+    WHERE email = $1 
+    `;
+    const values = [email];
+    const user = await this.dataSource.query(query, values);
+    return user[0];
+  }
+
   async updateUserBanInfo(
     userId: string,
     banUserDto: BanUserDto,
@@ -99,6 +109,21 @@ export class UsersRepository {
       isBanned,
       banDate,
       banReason,
+      userId,
+    ]);
+  }
+
+  async updateEmailConfirmationCode(
+    code: string,
+    userId: string,
+  ): Promise<void> {
+    const updateQuery = `
+      UPDATE public.users
+	      SET "confirmationCode"=$1
+	      WHERE id = $2;
+    `;
+    const updateResult = await this.dataSource.query(updateQuery, [
+      code,
       userId,
     ]);
   }

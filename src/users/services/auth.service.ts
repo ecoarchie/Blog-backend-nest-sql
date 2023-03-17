@@ -1,9 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from './jwt.service';
+import { JwtService } from '../../utils/jwt.service';
+import { SessionsRepository } from '../repositories/sessions.repository';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly sessionsRepository: SessionsRepository,
+  ) {}
   async validateUserBasic(authorization: string | null): Promise<boolean> {
     if (!authorization) {
       throw new UnauthorizedException();
@@ -29,15 +34,38 @@ export class AuthService {
     const token = authorization.split(' ')[1];
 
     const userId = await this.jwtService.getUserIdFromAccessToken(token);
-    // const sessionId = userId
-    //   ? await this.sessionModel.findOne
-    //   : null;
-    // if (!result) throw new UnauthorizedException();
 
     if (!userId) {
       throw new UnauthorizedException();
     }
-    // request.user = await usersService.findUserByIdService(userId);
     return userId;
+  }
+
+  async refreshTokens(
+    refreshToken: string,
+    ip: string,
+    browserTitle: string,
+  ): Promise<{ newAccessToken: string; newRefreshToken: string }> {
+    const validSession = await this.sessionsRepository.verifyToken(
+      refreshToken,
+    );
+    if (!validSession) throw new UnauthorizedException();
+
+    const newAccessToken = await this.jwtService.createJwtAccessToken(
+      validSession.userId,
+    );
+    const newRefreshToken = await this.jwtService.createJwtRefresh(
+      validSession.userId,
+      validSession.deviceId,
+    );
+    const tokenData: any = jwt.verify(newRefreshToken, process.env.SECRET);
+    await this.sessionsRepository.updateSession(
+      validSession.id,
+      ip,
+      browserTitle,
+      tokenData.iat,
+      tokenData.exp,
+    );
+    return { newAccessToken, newRefreshToken };
   }
 }

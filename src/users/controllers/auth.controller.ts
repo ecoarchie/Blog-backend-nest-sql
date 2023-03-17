@@ -21,11 +21,13 @@ import { UsersQueryRepository } from '../repositories/users.query-repository';
 import { AuthUserDto } from '../dtos/aurh-user.dto';
 import { SessionsService } from '../services/sessions.service';
 import { BearerAuthGuard } from '../guards/bearer.auth.guard';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly authService: AuthService,
     private readonly sessionsService: SessionsService,
     private readonly usersQueryRepo: UsersQueryRepository,
   ) {}
@@ -94,35 +96,35 @@ export class AuthController {
     }
   }
 
-  // @HttpCode(204)
-  // @Post('registration-email-resending')
-  // async resendRegistrationEmail(@Body() emailDto: EmailDto) {
-  //   await this.usersService.resendRegistrationEmail(emailDto.email);
-  // }
+  @HttpCode(204)
+  @Post('registration-email-resending')
+  async resendRegistrationEmail(@Body() emailDto: EmailDto) {
+    await this.usersService.resendRegistrationEmail(emailDto.email);
+  }
 
-  // @SkipThrottle()
-  // @Post('refresh-token')
-  // async refreshTokens(
-  //   @Ip() ip: string,
-  //   @Headers('user-agent') browserTitle: string,
-  //   @Req() req: Request,
-  //   @Res() res: Response,
-  // ) {
-  //   const refreshToken = req.cookies?.refreshToken;
-  //   if (!refreshToken) return res.sendStatus(401);
+  @SkipThrottle()
+  @Post('refresh-token')
+  async refreshTokens(
+    @Ip() ip: string,
+    @Headers('user-agent') browserTitle: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) return res.sendStatus(401);
 
-  //   const result = await this.usersService.refreshTokens(
-  //     refreshToken,
-  //     ip,
-  //     browserTitle,
-  //   );
-  //   const { newAccessToken, newRefreshToken } = result;
-  //   res.cookie('refreshToken', newRefreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   });
-  //   res.status(200).send({ accessToken: newAccessToken });
-  // }
+    const result = await this.authService.refreshTokens(
+      refreshToken,
+      ip,
+      browserTitle,
+    );
+    const { newAccessToken, newRefreshToken } = result;
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    res.status(200).send({ accessToken: newAccessToken });
+  }
 
   // @SkipThrottle()
   // @Post('logout')

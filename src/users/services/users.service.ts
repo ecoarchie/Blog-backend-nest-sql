@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../repositories/users.repository';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
@@ -77,6 +77,24 @@ export class UsersService {
     }
     await this.usersRepository.setEmailIsConfirmedToTrue(user.id);
     return true;
+  }
+
+  async resendRegistrationEmail(email: string) {
+    const user = await this.usersRepository.findUserByEmail(email);
+    if (user && !user.confirmationCodeIsConfirmed) {
+      const newConfirmationCode = uuidv4();
+      this.usersRepository.updateEmailConfirmationCode(
+        newConfirmationCode,
+        user.id,
+      );
+
+      await this.emailService.sendEmailConfirmationMessage(user);
+    } else {
+      throw new BadRequestException({
+        message: `Email is already confirmed or doesn't exist`,
+        field: 'email',
+      });
+    }
   }
 
   async checkCredentials(user: User, password: string): Promise<boolean> {
