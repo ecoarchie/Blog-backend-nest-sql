@@ -203,6 +203,20 @@ export class UsersRepository {
     const result = await this.dataSource.query(query, values);
   }
 
+  async deleteAllUsers() {
+    const query = `
+    DELETE FROM public.users
+    `;
+    await this.dataSource.query(query);
+  }
+
+  async deleteAllSessions() {
+    const query = `
+    DELETE FROM public.sessions
+    `;
+    await this.dataSource.query(query);
+  }
+
   private toPlainUserDto(user: User) {
     return {
       id: user.id,

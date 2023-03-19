@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
+import { UserPaginator } from '../dtos/users-paginator';
 import { User } from '../entities/user.entity';
-import format from 'pg-format';
 
 @Injectable()
 export class UsersQueryRepository {

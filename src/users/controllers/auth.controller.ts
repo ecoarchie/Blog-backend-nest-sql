@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { SkipThrottle } from '@nestjs/throttler';
+import { SkipThrottle, ThrottlerGuard } from '@nestjs/throttler';
 import { UsersService } from '../services/users.service';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { EmailDto } from '../dtos/email.dto';
@@ -23,6 +23,7 @@ import { SessionsService } from '../services/sessions.service';
 import { BearerAuthGuard } from '../guards/bearer.auth.guard';
 import { AuthService } from '../services/auth.service';
 
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -43,12 +44,11 @@ export class AuthController {
       authUserDto.loginOrEmail,
       authUserDto.password,
     );
-    console.log('🚀 ~ file: auth.controller.ts:31 ~ result:', result);
     if (!result) return res.sendStatus(401);
     const { accessToken, refreshToken } = result;
 
     await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
     res.status(200).send({ accessToken });
     // res.send(result);
   }
@@ -130,6 +130,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.refreshToken;
+    console.log(refreshToken);
     if (!refreshToken) return res.sendStatus(401);
 
     await this.usersService.logoutUser(refreshToken);

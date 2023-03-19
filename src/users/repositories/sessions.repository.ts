@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -14,7 +20,7 @@ export class SessionsRepository {
   async createNewSession(createSessionDto: CreateSessionDto): Promise<void> {
     const sessionInsertQuery = `
     INSERT INTO public.sessions(
-	 ip, "browserTitle", "lastActiveDate", "deviceId", "tokenExpireDate", "userId")
+	 ip, "title", "lastActiveDate", "deviceId", "tokenExpireDate", "userId")
 	VALUES ($1, $2, $3, $4, $5, $6)
     `;
 
@@ -39,7 +45,7 @@ export class SessionsRepository {
   ): Promise<void> {
     const query = `
      UPDATE public.sessions
-      SET "ip"=$1, "browserTitle"=$2, "lastActiveDate"=$3, "tokenExpireDate"=$4
+      SET "ip"=$1, "title"=$2, "lastActiveDate"=$3, "tokenExpireDate"=$4
       WHERE id=$5
     `;
     const values = [
@@ -97,6 +103,7 @@ export class SessionsRepository {
         return null;
       }
       const lastActiveDate = new Date(tokenData.iat * 1000);
+      console.log('lastActiveDate', lastActiveDate);
       const deviceId = tokenData.deviceId;
       const userId = tokenData.userId;
       const query = `
@@ -106,11 +113,90 @@ export class SessionsRepository {
         "userId"=$3
       `;
       const values = [lastActiveDate, deviceId, userId];
-      const result = await this.dataSource.query(query);
+      const result = await this.dataSource.query(query, values);
       return result[0];
     } catch (error) {
       console.log(error);
       return null;
+    }
+  }
+
+  async getActiveSessions(refreshToken: string) {
+    const validSession = await this.verifySessionByToken(refreshToken);
+    if (!validSession) throw new UnauthorizedException();
+
+    const userId = validSession.userId;
+    const query = `
+    SELECT id, title, "lastActiveDate", "deviceId" FROM public.sessions
+    WHERE "userId"=$1
+
+`;
+    const sessionFound = await this.dataSource.query(query, [userId]);
+    if (sessionFound.length === 0) throw new UnauthorizedException();
+
+    // return result.map((session) => ({
+    //   ip: session.ip,
+    //   title: session.browserTitle,
+    //   lastActiveDate: session.lastActiveDate,
+    //   deviceId: session.deviceId,
+    // }));
+    return sessionFound;
+  }
+
+  async deleteRestSessions(refreshToken: string): Promise<void> {
+    const validSession = await this.verifySessionByToken(refreshToken);
+    if (!validSession) throw new UnauthorizedException();
+
+    const userId = validSession.userId;
+    const deviceId = validSession.deviceId;
+    const deleteQuery = `
+    DELETE FROM public.sessions
+	    WHERE "userId"=$1 AND "deviceId"=$2;
+    `;
+    const result = await this.dataSource.query(deleteQuery, [userId, deviceId]);
+    return;
+  }
+
+  async deleteAllBannedUserSessions(userId: string): Promise<void> {
+    const deleteQuery = `
+    DELETE FROM public.sessions
+      WHERE "userId"=$1
+    `;
+    const res = await this.dataSource.query(deleteQuery, [userId]);
+  }
+
+  async deleteDeviceSessions(
+    refreshToken: string,
+    deviceId: string,
+  ): Promise<void> {
+    const validSession = await this.verifySessionByToken(refreshToken);
+    if (!validSession) throw new UnauthorizedException();
+
+    const userId = validSession.userId;
+    const sessionQuery = `
+    SELECT * FROM public.sessions
+      WHERE "deviceId"=$1
+    `;
+    const foundDeviceSession = await this.dataSource.query(sessionQuery, [
+      deviceId,
+    ]);
+    if (foundDeviceSession.length === 0) {
+      throw new NotFoundException();
+    }
+    if (foundDeviceSession[0].userId !== userId) {
+      throw new ForbiddenException();
+    } else {
+      const deleteQuery = `
+      DELETE FROM public.sessions
+        WHERE "deviceId"=$1
+      `;
+      try {
+        await this.dataSource.query(deleteQuery, [deviceId]);
+      } catch (error) {
+        console.log(error);
+        console.log('cannot delete device session');
+        throw new BadRequestException();
+      }
     }
   }
 

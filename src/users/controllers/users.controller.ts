@@ -14,7 +14,7 @@ import {
 import { BanUserDto } from '../dtos/ban-user.dto';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { UsersPagination } from '../dtos/paginator';
-import { UserPaginator, UserPaginatorOptions } from '../dtos/users-paginator';
+import { UserPaginator  } from '../dtos/users-paginator';
 import { BasicAuthGuard } from '../guards/basic.auth.guard';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
 import { UsersRepository } from '../repositories/users.repository';
@@ -33,7 +33,6 @@ export class UsersController {
   async findAll(
     @Query() userPaginatorQuery: UserPaginator,
   ): Promise<UsersPagination> {
-    // const userPaginatorOptions = new UserPaginatorOptions(userPaginatorQuery);
     const users = await this.usersQueryRepository.findAll(userPaginatorQuery);
     return users;
   }

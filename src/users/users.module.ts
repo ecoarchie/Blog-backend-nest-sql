@@ -23,5 +23,6 @@ import { UsersService } from './services/users.service';
     JwtService,
     AuthService,
   ],
+  exports: [UsersRepository],
 })
 export class UsersModule {}

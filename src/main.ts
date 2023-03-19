@@ -1,8 +1,8 @@
+import cookieParser from 'cookie-parser';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { useContainer } from 'class-validator'
-import cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
 import { HttpExceptionFilter } from './utils/http-exeption.filter';
 
 const PORT = process.env.PORT || 5000;
