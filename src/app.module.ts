@@ -13,7 +13,7 @@ const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`,
+      url: `postgres://${PGUSER}:${PGPASSWORD}@ep-delicate-snowflake-008406.eu-central-1.aws.neon.tech/${PGDATABASE}`,
       // host: process.env.HOST || 'localhost',
       // port: 5432,
       // username: process.env.DB_USERNAME || 'postgres',
