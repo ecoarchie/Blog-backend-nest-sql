@@ -18,7 +18,7 @@ import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { EmailDto } from '../dtos/email.dto';
 import { NewPasswordDto } from '../dtos/new-password.dto';
 import { UsersQueryRepository } from '../repositories/users.query-repository';
-import { AuthUserDto } from '../dtos/aurh-user.dto';
+import { AuthUserDto, ConfirmationCode } from '../dtos/aurh-user.dto';
 import { SessionsService } from '../services/sessions.service';
 import { BearerAuthGuard } from '../guards/bearer.auth.guard';
 import { AuthService } from '../services/auth.service';
@@ -86,8 +86,8 @@ export class AuthController {
   @SkipThrottle()
   @HttpCode(204)
   @Post('registration-confirmation')
-  async comfirmRegistration(@Body('code') confirmationCode: string) {
-    const result = await this.usersService.confirmEmail(confirmationCode);
+  async comfirmRegistration(@Body() confirmationCode: ConfirmationCode) {
+    const result = await this.usersService.confirmEmail(confirmationCode.code);
     if (!result) {
       throw new BadRequestException({
         message:

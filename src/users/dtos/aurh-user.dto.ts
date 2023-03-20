@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class AuthUserDto {
   @IsString()
@@ -8,4 +8,9 @@ export class AuthUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+}
+
+export class ConfirmationCode {
+  @IsUUID()
+  code: string;
 }
