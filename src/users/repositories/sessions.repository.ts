@@ -127,7 +127,7 @@ export class SessionsRepository {
 
     const userId = validSession.userId;
     const query = `
-    SELECT id, title, "lastActiveDate", "deviceId" FROM public.sessions
+    SELECT ip, title, "lastActiveDate", "deviceId" FROM public.sessions
     WHERE "userId"=$1
 
 `;
@@ -147,7 +147,7 @@ export class SessionsRepository {
     DELETE FROM public.sessions
 	    WHERE "userId"=$1 AND "deviceId"=$2;
     `;
-    const result = await this.dataSource.query(deleteQuery, [userId, deviceId]);
+    await this.dataSource.query(deleteQuery, [userId, deviceId]);
     return;
   }
 
@@ -156,7 +156,7 @@ export class SessionsRepository {
     DELETE FROM public.sessions
       WHERE "userId"=$1
     `;
-    const res = await this.dataSource.query(deleteQuery, [userId]);
+    await this.dataSource.query(deleteQuery, [userId]);
   }
 
   async deleteDeviceSessions(
@@ -174,6 +174,7 @@ export class SessionsRepository {
     const foundDeviceSession = await this.dataSource.query(sessionQuery, [
       deviceId,
     ]);
+    console.log(foundDeviceSession);
     if (foundDeviceSession.length === 0) {
       throw new NotFoundException();
     }
