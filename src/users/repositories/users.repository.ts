@@ -150,6 +150,7 @@ export class UsersRepository {
     SELECT * FROM public.users
     WHERE "confirmationCode" = $1 
     `;
+    //
     const values = [code];
     const user = await this.dataSource.query(query, values);
     return user.length !== 0 ? user[0] : null;
