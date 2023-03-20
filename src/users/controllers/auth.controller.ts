@@ -48,7 +48,7 @@ export class AuthController {
     const { accessToken, refreshToken } = result;
 
     await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
     res.status(200).send({ accessToken });
     // res.send(result);
   }
@@ -112,6 +112,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const refreshToken = req.cookies?.refreshToken;
+    console.log(refreshToken);
     if (!refreshToken) return res.sendStatus(401);
 
     const result = await this.authService.refreshTokens(

@@ -51,8 +51,8 @@ export class SessionsRepository {
     const values = [
       ip,
       browserTitle,
-      newActiveDate,
-      newTokenExpDate,
+      new Date(newActiveDate * 1000),
+      new Date(newTokenExpDate * 1000),
       sessionId,
     ];
     await this.dataSource.query(query, values);
@@ -104,7 +104,6 @@ export class SessionsRepository {
         return null;
       }
       const lastActiveDate = new Date(tokenData.iat * 1000);
-      console.log('lastActiveDate', lastActiveDate);
       const deviceId = tokenData.deviceId;
       const userId = tokenData.userId;
       const query = `
