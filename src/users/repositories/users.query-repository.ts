@@ -27,7 +27,7 @@ export class UsersQueryRepository {
       (userPaginatorOptions.pageNumber - 1) * userPaginatorOptions.pageSize;
     const query = `
     SELECT * FROM public.users
-    WHERE LOWER(login) LIKE LOWER($1) AND email LIKE $2 AND ("isBanned" = ${banStatus}) 
+    WHERE (LOWER(login) LIKE LOWER($1) OR email LIKE $2) AND ("isBanned" = ${banStatus}) 
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $3 OFFSET $4 
     `;

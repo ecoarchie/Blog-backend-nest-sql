@@ -83,6 +83,7 @@ export class AuthController {
     await this.usersService.sendEmailConfirmation(newUserId);
   }
 
+  @SkipThrottle()
   @HttpCode(204)
   @Post('registration-confirmation')
   async comfirmRegistration(@Body('code') confirmationCode: string) {
