@@ -134,12 +134,6 @@ export class SessionsRepository {
     const sessionFound = await this.dataSource.query(query, [userId]);
     if (sessionFound.length === 0) throw new UnauthorizedException();
 
-    // return result.map((session) => ({
-    //   ip: session.ip,
-    //   title: session.browserTitle,
-    //   lastActiveDate: session.lastActiveDate,
-    //   deviceId: session.deviceId,
-    // }));
     return sessionFound;
   }
 
