@@ -22,8 +22,8 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true,
     }),
     ThrottlerModule.forRoot({
-      ttl: 30,
-      limit: 50,
+      ttl: 10,
+      limit: 5,
     }),
     UsersModule,
   ],

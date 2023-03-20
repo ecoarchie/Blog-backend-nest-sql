@@ -48,7 +48,10 @@ export class AuthController {
     const { accessToken, refreshToken } = result;
 
     await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: Boolean(process.env.HTTP_SECURE) || false,
+    });
     res.status(200).send({ accessToken });
     // res.send(result);
   }
@@ -83,7 +86,6 @@ export class AuthController {
     await this.usersService.sendEmailConfirmation(newUserId);
   }
 
-  @SkipThrottle()
   @HttpCode(204)
   @Post('registration-confirmation')
   async comfirmRegistration(@Body() confirmationCode: ConfirmationCode) {
@@ -123,7 +125,7 @@ export class AuthController {
     const { newAccessToken, newRefreshToken } = result;
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: Boolean(process.env.HTTP_SECURE) || false,
     });
     res.status(200).send({ accessToken: newAccessToken });
   }

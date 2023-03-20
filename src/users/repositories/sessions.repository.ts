@@ -145,7 +145,7 @@ export class SessionsRepository {
     const deviceId = validSession.deviceId;
     const deleteQuery = `
     DELETE FROM public.sessions
-	    WHERE "userId"=$1 AND "deviceId"=$2;
+	    WHERE "userId"=$1 AND "deviceId"!=$2;
     `;
     await this.dataSource.query(deleteQuery, [userId, deviceId]);
     return;
