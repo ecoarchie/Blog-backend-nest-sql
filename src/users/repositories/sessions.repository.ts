@@ -55,6 +55,7 @@ export class SessionsRepository {
       newTokenExpDate,
       sessionId,
     ];
+    await this.dataSource.query(query, values);
   }
 
   async deleteSession(id: number) {
@@ -85,7 +86,7 @@ export class SessionsRepository {
 
     const res: User[] = await this.dataSource.query(query, values);
     const user = res[0];
-    return res[0];
+    return user;
   }
 
   async deleteAllUserSessions(userId: string): Promise<void> {
