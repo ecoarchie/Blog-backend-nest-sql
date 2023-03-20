@@ -37,7 +37,7 @@ export class UsersQueryRepository {
 
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.users
-    WHERE login LIKE $1 AND email LIKE $2 AND ("isBanned" = ${banStatus}) 
+    WHERE (LOWER(login) LIKE LOWER($1) OR email LIKE $2) AND ("isBanned" = ${banStatus}) 
     `;
     const result = await this.dataSource.query(totalCountQuery, [
       searchLoginTerm,
