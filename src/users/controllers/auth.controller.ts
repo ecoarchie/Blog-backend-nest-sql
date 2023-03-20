@@ -48,7 +48,7 @@ export class AuthController {
     const { accessToken, refreshToken } = result;
 
     await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     res.status(200).send({ accessToken });
     // res.send(result);
   }

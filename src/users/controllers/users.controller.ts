@@ -33,9 +33,7 @@ export class UsersController {
   async findAll(
     @Query() userPaginatorQuery: UserPaginator,
   ): Promise<UsersPagination> {
-    console.log('here');
     const users = await this.usersQueryRepository.findAll(userPaginatorQuery);
-    console.log(users);
     return users;
   }
   //
