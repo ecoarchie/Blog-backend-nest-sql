@@ -6,23 +6,20 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 
-const { PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } =
-  process.env;
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}`,
+      // url: `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}`,
+      host: process.env.PGHOST || 'localhost',
+      port: 5432,
+      username: process.env.PGUSER || 'postgres',
+      password: process.env.PGPASSWORD || 'sa',
+      database: process.env.PGDATABASE || 'nest-db',
       ssl: true,
-      // host: process.env.HOST || 'localhost',
-      // port: 5432,
-      // username: process.env.DB_USERNAME || 'postgres',
-      // password: process.env.DB_PASS || 'sa',
-      // database: process.env.DB_NAME || 'nest-db',
-      autoLoadEntities: false,
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     ThrottlerModule.forRoot({
       ttl: 30,
