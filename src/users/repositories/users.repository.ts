@@ -154,7 +154,7 @@ export class UsersRepository {
     const user = await this.dataSource.query(query, values);
     return user.length !== 0 ? user[0] : null;
   }
-
+  //
   async findUserByRecoveryCode(code: string): Promise<User> {
     const query = `
     SELECT * FROM public.users
