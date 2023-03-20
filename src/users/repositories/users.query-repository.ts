@@ -27,11 +27,12 @@ export class UsersQueryRepository {
       (userPaginatorOptions.pageNumber - 1) * userPaginatorOptions.pageSize;
     const query = `
     SELECT * FROM public.users
-    WHERE login LIKE $1 AND email LIKE $2 AND ("isBanned" = ${banStatus}) 
+    WHERE LOWER(login) LIKE LOWER($1) AND email LIKE $2 AND ("isBanned" = ${banStatus}) 
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $3 OFFSET $4 
     `;
     const values = [searchLoginTerm, searchEmailTerm, pageSize, skip];
+    console.log(values);
     const users = await this.dataSource.query(query, values);
 
     const totalCountQuery = `
