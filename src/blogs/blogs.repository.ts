@@ -176,8 +176,8 @@ export class BlogsRepository {
     UPDATE public.blogs
 	  SET "isBanned"=$1, "banDate"=$2
 	  WHERE id=$3;
-`
-    await this.dataSource.query(query, [isBanned, banDate, blogId])
+`;
+    await this.dataSource.query(query, [isBanned, banDate, blogId]);
   }
 
   async bindBlogToUser(userId: string, blogId: string) {
@@ -185,7 +185,14 @@ export class BlogsRepository {
     UPDATE public.blogs
 	  SET "ownerId"=$1
 	  WHERE id=$2;
-`
-    await this.dataSource.query(query, [userId, blogId])
+`;
+    await this.dataSource.query(query, [userId, blogId]);
+  }
+
+  async deleteAllBlogs() {
+    const query = `
+    DELETE FROM public.blogs
+`;
+    await this.dataSource.query(query);
   }
 }
