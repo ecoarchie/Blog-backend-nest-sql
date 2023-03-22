@@ -1,4 +1,5 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { AccessTokenValidationMiddleware } from 'src/middlewares/accessTokenCheck.middleware';
 import { PostsModule } from 'src/posts/posts.module';
 import { UsersModule } from 'src/users/users.module';
 import { BlogsBloggerController } from './blogger-blogs.controller';
@@ -14,4 +15,8 @@ import { SuperUserBlogsPublicController } from './sa-blogs.controller';
   controllers: [BlogsPublicController, BlogsBloggerController, SuperUserBlogsPublicController],
   providers: [BlogsService, BlogsRepository, BlogsQueryRepository],
 })
-export class BlogsModule {}
+export class BlogsModule implements NestModule{
+    configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AccessTokenValidationMiddleware).forRoutes(BlogsPublicController);
+  }
+}
