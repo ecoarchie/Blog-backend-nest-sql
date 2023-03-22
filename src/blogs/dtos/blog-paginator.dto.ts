@@ -25,7 +25,7 @@ export class BlogsPaginator {
 
   @IsString()
   @IsOptional()
-  searchNameTerm: string = null;
+  searchNameTerm: string | null = null;
 }
 
 export interface BlogsPagination extends Pagination {

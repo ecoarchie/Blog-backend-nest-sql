@@ -99,7 +99,7 @@ export class SessionsRepository {
 
   async verifySessionByToken(token: string): Promise<Session | null> {
     try {
-      const tokenData: any = jwt.verify(token, process.env.SECRET);
+      const tokenData: any = jwt.verify(token, process.env.SECRET as jwt.Secret);
       if (tokenData.exp < Date.now() / 1000) {
         return null;
       }

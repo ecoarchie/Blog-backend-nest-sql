@@ -60,11 +60,11 @@ export class AuthController {
   @UseGuards(BearerAuthGuard)
   @Get('me')
   async getCurrentUserInfo(@Req() req: Request) {
-    const user = await this.usersQueryRepo.findUserById(req.user.id);
+    const user = await this.usersQueryRepo.findUserById(req.user!.id);
     return {
-      email: user.email,
-      login: user.login,
-      userId: req.user.id,
+      email: user!.email,
+      login: user!.login,
+      userId: req.user!.id,
     };
   }
 

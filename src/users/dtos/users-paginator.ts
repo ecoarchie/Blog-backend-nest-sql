@@ -30,9 +30,9 @@ export class UserPaginator {
 
   @IsString()
   @IsOptional()
-  searchLoginTerm: string = null;
+  searchLoginTerm: string | null = null;
 
   @IsString()
   @IsOptional()
-  searchEmailTerm: string = null;
+  searchEmailTerm: string | null = null;
 }

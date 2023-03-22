@@ -23,5 +23,5 @@ export class BannedUsersPaginator {
 
   @IsString()
   @IsOptional()
-  searchLoginTerm: string = null;
+  searchLoginTerm: string | null = null;
 }

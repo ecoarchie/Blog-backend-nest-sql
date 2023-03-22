@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
-import { add } from 'date-fns';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { SessionsRepository } from './sessions.repository';
@@ -91,8 +89,8 @@ export class UsersRepository {
     banUserDto: BanUserDto,
   ): Promise<void> {
     let isBanned: boolean;
-    let banReason: string;
-    let banDate: Date;
+    let banReason: string | null;
+    let banDate: Date | null;
 
     isBanned = banUserDto.isBanned;
     if (!banUserDto.isBanned) {
@@ -107,7 +105,7 @@ export class UsersRepository {
 	      SET "isBanned"=$1, "banDate"=$2, "banReason"=$3
 	      WHERE id = $4;
     `;
-    const updateResult = await this.dataSource.query(updateQuery, [
+    await this.dataSource.query(updateQuery, [
       isBanned,
       banDate,
       banReason,
@@ -139,7 +137,7 @@ export class UsersRepository {
 	      SET "confirmationCode"=$1
 	      WHERE id = $2;
     `;
-    const updateResult = await this.dataSource.query(updateQuery, [
+    await this.dataSource.query(updateQuery, [
       code,
       userId,
     ]);
@@ -171,7 +169,7 @@ export class UsersRepository {
 	      SET "confirmationCodeIsConfirmed"=TRUE
 	      WHERE id = $1;
     `;
-    const res = await this.dataSource.query(updateQuery, [userId]);
+    await this.dataSource.query(updateQuery, [userId]);
   }
 
   async saveUser(user: User): Promise<void> {
@@ -200,7 +198,7 @@ export class UsersRepository {
       user.id,
     ];
 
-    const result = await this.dataSource.query(query, values);
+    await this.dataSource.query(query, values);
   }
 
   async deleteAllUsers() {

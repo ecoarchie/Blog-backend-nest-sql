@@ -27,7 +27,7 @@ export class AuthService {
     return true;
   }
 
-  async validateUserBearer(authorization: string): Promise<string> {
+  async validateUserBearer(authorization: string | undefined): Promise<string> {
     if (!authorization) {
       throw new UnauthorizedException();
     }
@@ -58,7 +58,7 @@ export class AuthService {
       validSession.userId,
       validSession.deviceId,
     );
-    const tokenData: any = jwt.verify(newRefreshToken, process.env.SECRET);
+    const tokenData: any = jwt.verify(newRefreshToken, process.env.SECRET as jwt.Secret);
     await this.sessionsRepository.updateSession(
       validSession.id,
       ip,

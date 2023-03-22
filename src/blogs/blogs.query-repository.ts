@@ -85,7 +85,7 @@ export class BlogsQueryRepository {
     };
   }
 
-  toSaBlogViewModel(b) {
+  toSaBlogViewModel(b: any) {
     return {
       id: b.id,
       name: b.name,

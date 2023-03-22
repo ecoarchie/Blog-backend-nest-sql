@@ -55,7 +55,8 @@ export class UsersQueryRepository {
     };
   }
 
-  async findUserById(newUserId: string) {
+  async findUserById(newUserId: string | null) {
+    if (!newUserId) return null;
     const query = `
     SELECT * FROM public.users
     WHERE id = $1 
@@ -67,7 +68,7 @@ export class UsersQueryRepository {
 
   async getUserLoginById(id: string): Promise<User['login']> {
     const user = await this.findUserById(id);
-    return user.login;
+    return user!.login;
   }
 
   async findUserByLoginOrEmail(login: string, email: string): Promise<User> {

@@ -45,7 +45,7 @@ export const validationPipeOptions: ValidationPipeOptions = {
   exceptionFactory: (errors) => {
     const errorsForResponse: any = [];
 
-    errors.forEach((e) => {
+    errors.forEach((e: any) => {
       const constraintsKey = Object.keys(e.constraints);
       constraintsKey.forEach((ckey) => {
         errorsForResponse.push({
