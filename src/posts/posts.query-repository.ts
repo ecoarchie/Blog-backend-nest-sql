@@ -69,6 +69,10 @@ export class PostsQueryRepository {
     };
   }
 
+  async findPostById(postId: string, currentUserId: string) {
+      throw new Error('Method not implemented.');
+  }
+
   toPostsViewModel(post: BlogPost & {blogName: string}) {
     return {
       id: post.id,

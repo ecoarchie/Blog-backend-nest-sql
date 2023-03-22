@@ -1,16 +1,31 @@
-import { Body, Controller, ForbiddenException, Get, HttpCode, NotFoundException, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '../decorators/current-user-param.decorator';
 import { BlogsService } from '../blogs/blogs.service';
 import { PostsQueryRepository } from './posts.query-repository';
 import { PostsService } from './posts.service';
-import { Request, Response } from 'express'
+import { Request, Response } from 'express';
 import { BearerAuthGuard } from '../users/guards/bearer.auth.guard';
 import { PostPaginator } from './dtos/post-paginator';
+import { PostsRepository } from './posts.repository';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsRepository: PostsRepository,
     private readonly postService: PostsService,
     // private readonly commentsService: CommentsService,
     // private readonly commentsQueryRepo: CommentsQueryRepository,
@@ -30,23 +45,20 @@ export class PostsController {
     return res.send(posts);
   }
 
-  // @Get(':postId')
-  // async getPostById(
-  //   @Param('postId') postId: string,
-  //   @CurrentUser('id') currentUserId: string,
-  //   @Res() res: Response,
-  // ) {
-  //   const postFound = await this.postsQueryRepository.findPostById(
-  //     postId,
-  //     currentUserId,
-  //   );
-  //   if (!postFound) return res.sendStatus(404);
-  //   const isBlogBanned = await this.blogsService.isBlogBanned(
-  //     postFound.blogId.toString(),
-  //   );
-  //   if (isBlogBanned) return res.sendStatus(404);
-  //   res.status(200).send(postFound);
-  // }
+  @Get(':postId')
+  async getPostById(
+    @Param('postId') postId: string,
+    @CurrentUser('id') currentUserId: string,
+    @Res() res: Response,
+  ) {
+    const postFound = await this.postsRepository.findPostById(postId);
+    if (!postFound) return res.sendStatus(404);
+    const isBlogBanned = await this.blogsService.isBlogBanned(
+      postFound.blogId,
+    );
+    if (isBlogBanned) return res.sendStatus(404);
+    res.status(200).send(postFound);
+  }
 
   // @UseGuards(BearerAuthGuard)
   // @Post(':postId/comments')

@@ -130,5 +130,12 @@ export class BlogsService {
         field: 'userId',
       });
     }
-    await this.blogsRepository.bindBlogToUser(userId, blogId) }
+    await this.blogsRepository.bindBlogToUser(userId, blogId) 
+  }
+
+  async isBlogBanned(blogId: string) {
+    const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    if (!blog || !blog.isBanned) return false
+    return true;
+  }
 }
