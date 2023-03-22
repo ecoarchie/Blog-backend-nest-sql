@@ -6,17 +6,15 @@ import {
 } from '@nestjs/common';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsRepository } from './blogs.repository';
-import { IBlogOwnerInfo } from './dtos/blogOwnerInfo.interface';
 import { CreateBlogDto } from './dtos/createBlog.dto';
-import { CurrentUserDto } from './dtos/currentUser.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
 import isUUID from 'validator/lib/isUUID';
-import { CreatePostDto } from 'src/posts/dtos/createPost.dto';
+import { CreatePostDto } from '../posts/dtos/createPost.dto';
 import { DataSource } from 'typeorm';
-import { BannedUsersPaginator } from 'src/users/dtos/banned-users-paginator';
-import { BanUserByBloggerDto } from 'src/users/dtos/ban-user-by-blogger.dto';
+import { BannedUsersPaginator } from '../users/dtos/banned-users-paginator';
+import { BanUserByBloggerDto } from '../users/dtos/ban-user-by-blogger.dto';
 import { BanBlogDto } from './dtos/banBlog.dto';
-import { UsersRepository } from 'src/users/repositories/users.repository';
+import { UsersRepository } from '../users/repositories/users.repository';
 
 @Injectable()
 export class BlogsService {

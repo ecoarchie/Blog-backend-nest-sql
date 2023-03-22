@@ -1,6 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { BasicAuthGuard } from 'src/users/guards/basic.auth.guard';
+import { BasicAuthGuard } from '../users/guards/basic.auth.guard';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsService } from './blogs.service';
 import { BanBlogDto } from './dtos/banBlog.dto';

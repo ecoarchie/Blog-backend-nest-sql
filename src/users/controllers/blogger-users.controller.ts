@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Param, Put, Query, UseGuards } from "@nestjs/common";
 import { BlogsQueryRepository } from "src/blogs/blogs.query-repository";
-import { BlogsService } from "src/blogs/blogs.service";
-import { CurrentUser } from "src/decorators/current-user-param.decorator";
+import { BlogsService } from "../../blogs/blogs.service";
+import { CurrentUser } from "../../decorators/current-user-param.decorator";
 import { BanUserByBloggerDto } from "../dtos/ban-user-by-blogger.dto";
 import { BannedUsersPaginator } from "../dtos/banned-users-paginator";
 import { UsersPagination } from "../dtos/paginator";

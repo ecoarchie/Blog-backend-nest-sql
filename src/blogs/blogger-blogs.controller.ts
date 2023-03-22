@@ -8,11 +8,8 @@ import {
   Post,
   Put,
   Query,
-  Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { CurrentUser } from 'src/decorators/current-user-param.decorator';
 import { CreatePostDto } from 'src/posts/dtos/createPost.dto';
 import { UpdatePostDto } from 'src/posts/dtos/updatePost.dto';
@@ -23,9 +20,7 @@ import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsRepository } from './blogs.repository';
 import { BlogsService } from './blogs.service';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
-import { IBlogOwnerInfo } from './dtos/blogOwnerInfo.interface';
 import { CreateBlogDto } from './dtos/createBlog.dto';
-import { CurrentUserDto } from './dtos/currentUser.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
 import { Blog } from './entities/blog.entity';
 

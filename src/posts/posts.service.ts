@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { BlogsRepository } from 'src/blogs/blogs.repository';
-import { UpdateBlogDto } from 'src/blogs/dtos/updateBlogDto';
+import { BlogsRepository } from '../blogs/blogs.repository';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
 
