@@ -28,7 +28,6 @@ import { Blog } from './entities/blog.entity';
 @Controller('blogger/blogs')
 export class BlogsBloggerController {
   constructor(
-    private readonly blogsRepository: BlogsRepository, // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly blogsQueryRepository: BlogsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly blogsService: BlogsService, // private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsQueryRepository: PostsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
@@ -40,7 +39,7 @@ export class BlogsBloggerController {
     @Body() blogDto: CreateBlogDto,
     @CurrentUser('id') currentUserId: string,
   ): Promise<Partial<Blog>> {
-    const newBlogId = await this.blogsService.createNewBlog(
+    await this.blogsService.createNewBlog(
       blogDto,
       currentUserId,
     );

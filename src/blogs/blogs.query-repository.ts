@@ -156,11 +156,12 @@ export class BlogsQueryRepository {
 
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.blogs
-    WHERE LOWER(name) LIKE LOWER($1) AND "isBanned" = $2 
+    WHERE LOWER(name) LIKE LOWER($1) AND "isBanned" = $2 AND "ownerId"=$3 
     `;
     const result = await this.dataSource.query(totalCountQuery, [
       searchNameTerm,
       false,
+      currentUserId
     ]);
     const totalCount = Number(result[0].count);
 
