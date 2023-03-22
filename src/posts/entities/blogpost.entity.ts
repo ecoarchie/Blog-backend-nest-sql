@@ -4,6 +4,5 @@ export class BlogPost {
   shortDescription: string;
   content: string;
   blogId: string;
-  blogName: string;
   createdAt: Date;
 }

@@ -24,7 +24,7 @@ export class BlogsQueryRepository {
     LIMIT $2 OFFSET $3 
     `;
     const values = [searchNameTerm, pageSize, skip];
-    const users = await this.dataSource.query(query, values);
+    const blogs = await this.dataSource.query(query, values);
 
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.blogs
@@ -41,7 +41,7 @@ export class BlogsQueryRepository {
       page: blogsPaginatorQuery.pageNumber,
       pageSize: blogsPaginatorQuery.pageSize,
       totalCount,
-      items: users,
+      items: blogs,
     };
   }
 
