@@ -26,6 +26,6 @@ import { UsersService } from './services/users.service';
     AuthService,
   ],
   imports: [forwardRef(() => BlogsModule)],
-  exports: [UsersRepository, UsersQueryRepository, AuthService],
+  exports: [UsersRepository, UsersQueryRepository, AuthService, JwtService],
 })
 export class UsersModule {}
