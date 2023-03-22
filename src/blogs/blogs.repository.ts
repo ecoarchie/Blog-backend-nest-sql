@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreatePostDto } from '../posts/dtos/createPost.dto';
 import { BanUserByBloggerDto } from '../users/dtos/ban-user-by-blogger.dto';
@@ -6,7 +6,6 @@ import { BannedUsersPaginator } from '../users/dtos/banned-users-paginator';
 import { DataSource } from 'typeorm';
 import { BanBlogDto } from './dtos/banBlog.dto';
 import { CreateBlogDto } from './dtos/createBlog.dto';
-import { CurrentUserDto } from './dtos/currentUser.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
 import { Blog } from './entities/blog.entity';
 

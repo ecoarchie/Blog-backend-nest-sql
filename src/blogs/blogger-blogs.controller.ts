@@ -10,12 +10,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from 'src/decorators/current-user-param.decorator';
-import { CreatePostDto } from 'src/posts/dtos/createPost.dto';
-import { UpdatePostDto } from 'src/posts/dtos/updatePost.dto';
-import { PostsQueryRepository } from 'src/posts/posts.query-repository';
-import { PostsService } from 'src/posts/posts.service';
-import { BearerAuthGuard } from 'src/users/guards/bearer.auth.guard';
+import { CurrentUser } from '../decorators/current-user-param.decorator';
+import { CreatePostDto } from '../posts/dtos/createPost.dto';
+import { UpdatePostDto } from '../posts/dtos/updatePost.dto';
+import { PostsQueryRepository } from '../posts/posts.query-repository';
+import { PostsService } from '../posts/posts.service';
+import { BearerAuthGuard } from '../users/guards/bearer.auth.guard';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsRepository } from './blogs.repository';
 import { BlogsService } from './blogs.service';
