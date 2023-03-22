@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { UsersPagination } from '../dtos/paginator';
 import { UserPaginator } from '../dtos/users-paginator';
 import { User } from '../entities/user.entity';
 
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async findAll(userPaginatorOptions: UserPaginator) {
+  async findAll(userPaginatorOptions: UserPaginator): Promise<UsersPagination> {
     const banStatus =
       userPaginatorOptions.banStatus === 'all'
         ? `${true} OR "isBanned" = ${false}`
@@ -32,7 +33,6 @@ export class UsersQueryRepository {
     LIMIT $3 OFFSET $4 
     `;
     const values = [searchLoginTerm, searchEmailTerm, pageSize, skip];
-    console.log(values);
     const users = await this.dataSource.query(query, values);
 
     const totalCountQuery = `

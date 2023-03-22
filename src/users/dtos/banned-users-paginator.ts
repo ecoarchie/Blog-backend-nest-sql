@@ -1,15 +1,8 @@
-import { Transform, TransformFnParams } from 'class-transformer';
-import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
+import { Transform, TransformFnParams } from "class-transformer";
+import { IsIn, IsOptional, IsPositive, IsString } from "class-validator";
+import { SortDirection, UserPaginator } from "./users-paginator";
 
-export type SortDirection = 'asc' | 'desc';
-
-type BanStatus = 'all' | 'banned' | 'notBanned';
-
-export class UserPaginator {
-  @IsIn(['all', 'banned', 'notBanned'])
-  @IsOptional()
-  banStatus: BanStatus = 'all';
-
+export class BannedUsersPaginator {
   @IsString()
   @IsOptional()
   sortBy: string = 'createdAt';
@@ -31,8 +24,4 @@ export class UserPaginator {
   @IsString()
   @IsOptional()
   searchLoginTerm: string = null;
-
-  @IsString()
-  @IsOptional()
-  searchEmailTerm: string = null;
 }

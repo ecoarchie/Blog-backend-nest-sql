@@ -1,7 +1,9 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { BlogsModule } from 'src/blogs/blogs.module';
 import { EmailService } from '../utils/email.service';
 import { JwtService } from '../utils/jwt.service';
 import { AuthController } from './controllers/auth.controller';
+import { BloggerUserController } from './controllers/blogger-users.controller';
 import { SessionsController } from './controllers/sessions.controller';
 import { UsersController } from './controllers/users.controller';
 import { SessionsRepository } from './repositories/sessions.repository';
@@ -12,7 +14,7 @@ import { SessionsService } from './services/sessions.service';
 import { UsersService } from './services/users.service';
 
 @Module({
-  controllers: [UsersController, AuthController, SessionsController],
+  controllers: [UsersController, BloggerUserController, AuthController, SessionsController],
   providers: [
     UsersService,
     UsersRepository,
@@ -23,6 +25,7 @@ import { UsersService } from './services/users.service';
     JwtService,
     AuthService,
   ],
-  exports: [UsersRepository],
+  imports: [forwardRef(() => BlogsModule)],
+  exports: [UsersRepository, UsersQueryRepository, AuthService],
 })
 export class UsersModule {}

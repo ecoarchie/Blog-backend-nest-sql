@@ -10,3 +10,4 @@ export interface Pagination {
 export interface UsersPagination extends Pagination {
   items: Partial<User>[];
 }
+

@@ -5,6 +5,8 @@ import { UsersModule } from './users/users.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { BlogsModule } from './blogs/blogs.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.PGUSER || 'postgres',
       password: process.env.PGPASSWORD || 'sa',
       database: process.env.PGDATABASE || 'nest-db',
-      ssl: true,
+      ssl: Boolean(process.env.PGSSL) || false,
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -26,6 +28,8 @@ import { ConfigModule } from '@nestjs/config';
       limit: 5,
     }),
     UsersModule,
+    BlogsModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

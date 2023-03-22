@@ -4,7 +4,7 @@ import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 
 @Controller('blogs')
-export class BlogsController {
+export class BlogsPublicController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
