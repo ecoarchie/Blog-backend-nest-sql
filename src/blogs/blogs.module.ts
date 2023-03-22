@@ -1,14 +1,14 @@
 import { forwardRef, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AccessTokenValidationMiddleware } from 'src/middlewares/accessTokenCheck.middleware';
-import { PostsModule } from 'src/posts/posts.module';
-import { UsersModule } from 'src/users/users.module';
-import { JwtService } from 'src/utils/jwt.service';
+import { JwtService } from '../utils/jwt.service';
+import { PostsModule } from '../posts/posts.module';
+import { UsersModule } from '../users/users.module';
 import { BlogsBloggerController } from './blogger-blogs.controller';
 import { BlogsPublicController } from './blogs.controller';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsRepository } from './blogs.repository';
 import { BlogsService } from './blogs.service';
 import { SuperUserBlogsPublicController } from './sa-blogs.controller';
+import { AccessTokenValidationMiddleware } from '../middlewares/accessTokenCheck.middleware';
 
 @Module({
   imports: [forwardRef(() => UsersModule), PostsModule],

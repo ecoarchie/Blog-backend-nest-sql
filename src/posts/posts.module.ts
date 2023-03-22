@@ -5,10 +5,10 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { BlogsModule } from 'src/blogs/blogs.module';
-import { AccessTokenValidationMiddleware } from 'src/middlewares/accessTokenCheck.middleware';
-import { UsersModule } from 'src/users/users.module';
-import { JwtService } from 'src/utils/jwt.service';
+import { BlogsModule } from '../blogs/blogs.module';
+import { AccessTokenValidationMiddleware } from '../middlewares/accessTokenCheck.middleware';
+import { UsersModule } from '../users/users.module';
+import { JwtService } from '../utils/jwt.service';
 import { PostsController } from './posts.controller';
 import { PostsQueryRepository } from './posts.query-repository';
 import { PostsRepository } from './posts.repository';

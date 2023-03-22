@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { BlogsModule } from 'src/blogs/blogs.module';
+import { BlogsModule } from '../blogs/blogs.module';
 import { EmailService } from '../utils/email.service';
 import { JwtService } from '../utils/jwt.service';
 import { AuthController } from './controllers/auth.controller';
