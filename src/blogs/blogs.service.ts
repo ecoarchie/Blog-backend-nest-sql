@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -15,12 +15,15 @@ import { CreatePostDto } from 'src/posts/dtos/createPost.dto';
 import { DataSource } from 'typeorm';
 import { BannedUsersPaginator } from 'src/users/dtos/banned-users-paginator';
 import { BanUserByBloggerDto } from 'src/users/dtos/ban-user-by-blogger.dto';
+import { BanBlogDto } from './dtos/banBlog.dto';
+import { UsersRepository } from 'src/users/repositories/users.repository';
 
 @Injectable()
 export class BlogsService {
   constructor(
     private readonly blogsRepository: BlogsRepository,
     private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly usersRepository: UsersRepository,
     protected dataSource: DataSource,
   ) {}
   async createNewBlog(
@@ -60,32 +63,74 @@ export class BlogsService {
 
   async deleteBlogById(currentUserId: string, blogId: string) {
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
-    console.log(blog)
+    console.log(blog);
     if (!blog) throw new NotFoundException();
-    if (blog.ownerId !== currentUserId) throw new ForbiddenException()
-
-    await this.blogsRepository.deleteBlogById(blogId)
-  }
-  async findAllBannedUsersForBlog(currentUserId: string, blogId: string, paginator: BannedUsersPaginator) {
-    const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
-    if (!blog) throw new NotFoundException()
     if (blog.ownerId !== currentUserId) throw new ForbiddenException();
 
-    const users = await this.blogsRepository.findAllBannedUsers(blogId, paginator);
+    await this.blogsRepository.deleteBlogById(blogId);
+  }
+  async findAllBannedUsersForBlog(
+    currentUserId: string,
+    blogId: string,
+    paginator: BannedUsersPaginator,
+  ) {
+    const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    if (!blog) throw new NotFoundException();
+    if (blog.ownerId !== currentUserId) throw new ForbiddenException();
+
+    const users = await this.blogsRepository.findAllBannedUsers(
+      blogId,
+      paginator,
+    );
     return users;
   }
 
-  async banUserByBlogger(bloggerId: string, userId: string, banUserByBloggerDto: BanUserByBloggerDto) {
-    const blog = await this.blogsRepository.findBlogWithOwnerById(banUserByBloggerDto.blogId);
+  async banUserByBlogger(
+    bloggerId: string,
+    userId: string,
+    banUserByBloggerDto: BanUserByBloggerDto,
+  ) {
+    const blog = await this.blogsRepository.findBlogWithOwnerById(
+      banUserByBloggerDto.blogId,
+    );
     if (!blog)
       throw new BadRequestException({
         field: 'blogId',
         message: 'blog with this ID not found',
       });
 
-    if (blog.ownerId !== bloggerId)
-      throw new ForbiddenException();
-    
-    await this.blogsRepository.updateBanStatusOfUserInBlog(banUserByBloggerDto, userId)
+    if (blog.ownerId !== bloggerId) throw new ForbiddenException();
+
+    await this.blogsRepository.updateBanStatusOfUserInBlog(
+      banUserByBloggerDto,
+      userId,
+    );
   }
+
+  async banBlog(blogId: string, banBlogDto: BanBlogDto) {
+    const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    if (!blog)
+      throw new BadRequestException({
+        field: 'blogId',
+        message: 'blog with such id does not exist',
+      });
+    await this.blogsRepository.setBanStatusToBlog(banBlogDto, blogId);
+  }
+
+  async bindBlogToUser(blogId: string, userId: string) {
+    const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    if (!blog || blog?.ownerId)
+      throw new BadRequestException({
+        message: 'Blog does not exist or is already bound',
+        field: 'blodId',
+      });
+
+    const user= await this.usersRepository.findUserById(userId)
+    if (!user) {
+      throw new BadRequestException({
+        message: 'User with passed Id does not exist',
+        field: 'userId',
+      });
+    }
+    await this.blogsRepository.bindBlogToUser(userId, blogId) }
 }

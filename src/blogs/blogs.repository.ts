@@ -4,6 +4,7 @@ import { CreatePostDto } from 'src/posts/dtos/createPost.dto';
 import { BanUserByBloggerDto } from 'src/users/dtos/ban-user-by-blogger.dto';
 import { BannedUsersPaginator } from 'src/users/dtos/banned-users-paginator';
 import { DataSource } from 'typeorm';
+import { BanBlogDto } from './dtos/banBlog.dto';
 import { CreateBlogDto } from './dtos/createBlog.dto';
 import { CurrentUserDto } from './dtos/currentUser.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
@@ -166,5 +167,25 @@ export class BlogsRepository {
         banUserByBloggerDto.banReason,
       ]);
     }
+  }
+
+  async setBanStatusToBlog(banBlogDto: BanBlogDto, blogId: string) {
+    const isBanned = banBlogDto.isBanned;
+    const banDate = isBanned ? new Date() : null;
+    const query = `
+    UPDATE public.blogs
+	  SET "isBanned"=$1, "banDate"=$2
+	  WHERE id=$3;
+`
+    await this.dataSource.query(query, [isBanned, banDate, blogId])
+  }
+
+  async bindBlogToUser(userId: string, blogId: string) {
+    const query = `
+    UPDATE public.blogs
+	  SET "ownerId"=$1
+	  WHERE id=$2;
+`
+    await this.dataSource.query(query, [userId, blogId])
   }
 }

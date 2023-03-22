@@ -1,4 +1,5 @@
 export class Blog {
+  id: string;
   name: string;
   description: string;
   websiteUrl: string;

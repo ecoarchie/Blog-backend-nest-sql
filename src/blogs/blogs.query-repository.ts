@@ -45,6 +45,65 @@ export class BlogsQueryRepository {
     };
   }
 
+  async findAllBlogsWithOwnerInfo(blogsPaginatorQuery: BlogsPaginator) {
+    const searchNameTerm = blogsPaginatorQuery.searchNameTerm
+      ? '%' + blogsPaginatorQuery.searchNameTerm + '%'
+      : '%';
+    const sortBy = blogsPaginatorQuery.sortBy;
+    const sortDirection = blogsPaginatorQuery.sortDirection;
+    const pageSize = blogsPaginatorQuery.pageSize;
+    const skip =
+      (blogsPaginatorQuery.pageNumber - 1) * blogsPaginatorQuery.pageSize;
+    const query = `
+    SELECT blogs.id, name, "description", "websiteUrl", blogs."createdAt", "isMembership", users.id "userId",
+    users.login "userLogin", blogs."isBanned", blogs."banDate" FROM public.blogs
+    LEFT JOIN users ON users.id=blogs."ownerId"
+    WHERE LOWER(name) LIKE LOWER($1) 
+    ORDER BY "${sortBy}" ${sortDirection}
+    LIMIT $2 OFFSET $3 
+    `;
+    const values = [searchNameTerm, pageSize, skip];
+    const blogs = await this.dataSource.query(query, values);
+
+    const totalCountQuery = `
+    SELECT COUNT(*) FROM public.blogs
+    LEFT JOIN users ON users.id=blogs."ownerId"
+    WHERE LOWER(name) LIKE LOWER($1) 
+    `;
+    const result = await this.dataSource.query(totalCountQuery, [
+      searchNameTerm,
+    ]);
+    const totalCount = Number(result[0].count);
+
+    const pagesCount = Math.ceil(totalCount / blogsPaginatorQuery.pageSize);
+    return {
+      pagesCount,
+      page: blogsPaginatorQuery.pageNumber,
+      pageSize: blogsPaginatorQuery.pageSize,
+      totalCount,
+      items: blogs.map(this.toSaBlogViewModel),
+    };
+  }
+
+  toSaBlogViewModel(b) {
+    return {
+      id: b.id,
+      name: b.name,
+      description: b.description,
+      websiteUrl: b.websiteUrl,
+      createdAt: b.createdAt,
+      isMembership: b.isMembership,
+      blogOwnerInfo: {
+        userId: b.userId,
+        userLogin: b.userLogin,
+      },
+      banInfo: {
+        isBanned: b.isBanned,
+        banDate: b.banDate,
+      },
+    };
+  }
+
   async findNotBannedBlogById(id: string): Promise<Partial<Blog>> {
     const query = `
     SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
