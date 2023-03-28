@@ -2,18 +2,33 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UpdatePostDto } from './dtos/updatePost.dto';
-import { BlogPost } from './entities/blogpost.entity';
 
 @Injectable()
 export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async findPostById(postId: string): Promise<BlogPost> {
+  async findPostById(postId: string) {
     const query = `
-    SELECT * FROM public.blogposts
-    WHERE id=$1
+    SELECT blogposts.id, title, "shortDescription", "content", "blogId", blogposts."createdAt", blogs."name" "blogName" FROM public.blogposts
+    LEFT JOIN blogs ON blogs.id=blogposts."blogId"
+    WHERE blogposts.id=$1
 `;
     const result = await this.dataSource.query(query, [postId]);
-    return result[0];
+    const post = result[0];
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
+    };
   }
 
   async updatePostById(postId: string, dto: UpdatePostDto) {

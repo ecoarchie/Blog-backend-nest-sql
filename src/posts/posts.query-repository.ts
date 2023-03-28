@@ -13,12 +13,11 @@ export class PostsQueryRepository {
 	    FROM public.blogposts
       LEFT JOIN blogs ON blogs.id="blogId"
       WHERE "blogId"=$1
-      ORDER BY $2 DESC
+      ORDER BY blogposts."createdAt" DESC
       LIMIT 1;
       `;
     const result = await this.dataSource.query(query, [
       blogId,
-      'blogposts.createdAt',
     ]);
     const post: BlogPost & {blogName: string} = result[0];
     return {
