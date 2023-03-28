@@ -14,7 +14,12 @@ import { SessionsService } from './services/sessions.service';
 import { UsersService } from './services/users.service';
 
 @Module({
-  controllers: [UsersController, BloggerUserController, AuthController, SessionsController],
+  controllers: [
+    UsersController,
+    BloggerUserController,
+    AuthController,
+    SessionsController,
+  ],
   providers: [
     UsersService,
     UsersRepository,

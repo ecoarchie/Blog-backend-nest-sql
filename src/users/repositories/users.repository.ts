@@ -137,10 +137,7 @@ export class UsersRepository {
 	      SET "confirmationCode"=$1
 	      WHERE id = $2;
     `;
-    await this.dataSource.query(updateQuery, [
-      code,
-      userId,
-    ]);
+    await this.dataSource.query(updateQuery, [code, userId]);
   }
 
   async findUserByConfirmCode(code: string): Promise<User> {

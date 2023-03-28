@@ -39,10 +39,7 @@ export class BlogsBloggerController {
     @Body() blogDto: CreateBlogDto,
     @CurrentUser('id') currentUserId: string,
   ): Promise<Partial<Blog>> {
-    await this.blogsService.createNewBlog(
-      blogDto,
-      currentUserId,
-    );
+    await this.blogsService.createNewBlog(blogDto, currentUserId);
     return this.blogsQueryRepository.findLatestCreatedBlog(currentUserId);
   }
 

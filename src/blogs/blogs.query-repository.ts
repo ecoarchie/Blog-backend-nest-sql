@@ -161,7 +161,7 @@ export class BlogsQueryRepository {
     const result = await this.dataSource.query(totalCountQuery, [
       searchNameTerm,
       false,
-      currentUserId
+      currentUserId,
     ]);
     const totalCount = Number(result[0].count);
 
