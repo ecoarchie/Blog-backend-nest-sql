@@ -1,13 +1,13 @@
 import { Transform, TransformFnParams } from 'class-transformer';
 import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
-import { Pagination } from 'src/users/dtos/paginator';
-import { SortDirection } from 'src/users/dtos/users-paginator';
+import { Pagination } from '../../users/dtos/paginator';
+import { SortDirection } from '../../users/dtos/users-paginator';
 import { BlogPost } from '../entities/blogpost.entity';
 
 export class PostPaginator {
   @IsString()
   @IsOptional()
-  sortBy: string = 'createdAt';
+  sortBy = 'createdAt';
 
   @IsIn(['asc', 'desc'])
   @IsOptional()
@@ -16,12 +16,12 @@ export class PostPaginator {
   @IsPositive()
   @Transform(({ value }: TransformFnParams) => Number(value))
   @IsOptional()
-  pageNumber: number = 1;
+  pageNumber = 1;
 
   @IsPositive()
   @Transform(({ value }: TransformFnParams) => Number(value))
   @IsOptional()
-  pageSize: number = 10;
+  pageSize = 10;
 
   @IsString()
   @IsOptional()

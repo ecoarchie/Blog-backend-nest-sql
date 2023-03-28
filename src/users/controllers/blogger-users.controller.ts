@@ -1,13 +1,22 @@
-import { Body, Controller, Get, HttpCode, Param, Put, Query, UseGuards } from "@nestjs/common";
-import { BlogsQueryRepository } from "src/blogs/blogs.query-repository";
-import { BlogsService } from "../../blogs/blogs.service";
-import { CurrentUser } from "../../decorators/current-user-param.decorator";
-import { BanUserByBloggerDto } from "../dtos/ban-user-by-blogger.dto";
-import { BannedUsersPaginator } from "../dtos/banned-users-paginator";
-import { UsersPagination } from "../dtos/paginator";
-import { BearerAuthGuard } from "../guards/bearer.auth.guard";
-import { UsersQueryRepository } from "../repositories/users.query-repository";
-import { UsersService } from "../services/users.service";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { BlogsQueryRepository } from '../../blogs/blogs.query-repository';
+import { BlogsService } from '../../blogs/blogs.service';
+import { CurrentUser } from '../../decorators/current-user-param.decorator';
+import { BanUserByBloggerDto } from '../dtos/ban-user-by-blogger.dto';
+import { BannedUsersPaginator } from '../dtos/banned-users-paginator';
+import { UsersPagination } from '../dtos/paginator';
+import { BearerAuthGuard } from '../guards/bearer.auth.guard';
+import { UsersQueryRepository } from '../repositories/users.query-repository';
+import { UsersService } from '../services/users.service';
 
 @UseGuards(BearerAuthGuard)
 @Controller('blogger/users')
@@ -47,4 +56,3 @@ export class BloggerUserController {
     );
   }
 }
-
