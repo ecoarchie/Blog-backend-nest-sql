@@ -98,6 +98,9 @@ export class BlogsService {
 
     if (blog.ownerId !== bloggerId) throw new ForbiddenException();
 
+    const user = await this.usersRepository.findUserById(userId);
+    if (!user) throw new NotFoundException();
+
     await this.blogsRepository.updateBanStatusOfUserInBlog(
       banUserByBloggerDto,
       userId,
