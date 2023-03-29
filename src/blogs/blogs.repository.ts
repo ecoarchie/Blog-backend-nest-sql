@@ -47,7 +47,7 @@ export class BlogsRepository {
 
   async findBlogWithOwnerById(blogId: string): Promise<Partial<Blog> | null> {
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership", "ownerId" FROM public.blogs
+    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership", "ownerId", "isBanned" FROM public.blogs
     WHERE id=$1
     `;
     const result = await this.dataSource.query(query, [blogId]);
