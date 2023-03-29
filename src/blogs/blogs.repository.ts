@@ -8,6 +8,7 @@ import { BanBlogDto } from './dtos/banBlog.dto';
 import { CreateBlogDto } from './dtos/createBlog.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
 import { Blog } from './entities/blog.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class BlogsRepository {
@@ -89,7 +90,15 @@ export class BlogsRepository {
       page: paginator.pageNumber,
       pageSize: paginator.pageSize,
       totalCount,
-      items: users,
+      items: users.map((u: User) => ({
+        id: u.id,
+        login: u.login,
+        banInfo: {
+          isBanned: u.isBanned,
+          banDate: u.banDate,
+          banReason: u.banReason,
+        },
+      })),
     };
   }
 
