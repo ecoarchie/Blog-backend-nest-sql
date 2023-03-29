@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, Param, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Put,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { BasicAuthGuard } from '../users/guards/basic.auth.guard';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsService } from './blogs.service';
@@ -11,7 +22,7 @@ import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 export class SuperUserBlogsPublicController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly blogsService: BlogsService
+    private readonly blogsService: BlogsService,
   ) {}
 
   @HttpCode(204)

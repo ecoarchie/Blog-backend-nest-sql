@@ -19,11 +19,11 @@ export class BlogsQueryRepository {
       (blogsPaginatorQuery.pageNumber - 1) * blogsPaginatorQuery.pageSize;
     const query = `
     SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE LOWER(name) LIKE LOWER($1) 
+    WHERE LOWER(name) LIKE LOWER($1) AND blogs."isBanned"=$4
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $2 OFFSET $3 
     `;
-    const values = [searchNameTerm, pageSize, skip];
+    const values = [searchNameTerm, pageSize, skip, false];
     const blogs = await this.dataSource.query(query, values);
 
     const totalCountQuery = `
