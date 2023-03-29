@@ -115,6 +115,9 @@ export class BlogsBloggerController {
     @Param('blogId') blogId: string,
     @Param('postId') postId: string,
   ) {
+    console.log(
+      `curUser = ${currentUserId}, blogId=${blogId}, postId=${postId}`,
+    );
     await this.postsService.deletePostById(blogId, postId, currentUserId);
   }
 
