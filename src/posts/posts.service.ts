@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { isUUID } from 'class-validator';
 import { BlogsRepository } from '../blogs/blogs.repository';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
@@ -8,7 +14,7 @@ export class PostsService {
   constructor(
     private blogsRepository: BlogsRepository,
     private postsRepository: PostsRepository,
-  ){}
+  ) {}
   async updatePostById(
     blogId: string,
     postId: string,
@@ -18,8 +24,7 @@ export class PostsService {
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
     const post = await this.postsRepository.findPostById(postId);
     if (!blog || !post) throw new NotFoundException();
-    if (blog.ownerId !== currentUserId)
-      throw new ForbiddenException();
+    if (blog.ownerId !== currentUserId) throw new ForbiddenException();
 
     if (post.blogId.toString() !== blogId)
       throw new BadRequestException({
@@ -30,11 +35,13 @@ export class PostsService {
   }
 
   async deletePostById(blogId: string, postId: string, currentUserId: string) {
+    if (!isUUID(blogId)) throw new NotFoundException();
+    if (!isUUID(postId)) throw new NotFoundException();
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
     const post = await this.postsRepository.findPostById(postId);
+    console.log(post);
     if (!blog || !post) throw new NotFoundException();
-    if (blog.ownerId !== currentUserId)
-      throw new ForbiddenException();
-    await this.postsRepository.deletePostById(postId)
+    if (blog.ownerId !== currentUserId) throw new ForbiddenException();
+    await this.postsRepository.deletePostById(postId);
   }
 }
