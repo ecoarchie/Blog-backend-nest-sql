@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UpdatePostDto } from './dtos/updatePost.dto';
@@ -13,6 +13,8 @@ export class PostsRepository {
     WHERE blogposts.id=$1
 `;
     const result = await this.dataSource.query(query, [postId]);
+    console.log(result);
+    if (result.length === 0) throw new NotFoundException();
     const post = result[0];
     return {
       id: post.id,
