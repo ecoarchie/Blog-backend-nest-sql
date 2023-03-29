@@ -61,7 +61,6 @@ export class BlogsService {
 
   async deleteBlogById(currentUserId: string, blogId: string) {
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
-    console.log(blog);
     if (!blog) throw new NotFoundException();
     if (blog.ownerId !== currentUserId) throw new ForbiddenException();
 
@@ -123,19 +122,19 @@ export class BlogsService {
         field: 'blodId',
       });
 
-    const user= await this.usersRepository.findUserById(userId)
+    const user = await this.usersRepository.findUserById(userId);
     if (!user) {
       throw new BadRequestException({
         message: 'User with passed Id does not exist',
         field: 'userId',
       });
     }
-    await this.blogsRepository.bindBlogToUser(userId, blogId) 
+    await this.blogsRepository.bindBlogToUser(userId, blogId);
   }
 
   async isBlogBanned(blogId: string) {
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
-    if (!blog || !blog.isBanned) return false
+    if (!blog || !blog.isBanned) return false;
     return true;
   }
 }

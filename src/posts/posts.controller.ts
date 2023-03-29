@@ -52,7 +52,6 @@ export class PostsController {
     @Res() res: Response,
   ) {
     const postFound = await this.postsRepository.findPostById(postId);
-    console.log(postFound);
     if (!postFound) return res.sendStatus(404);
     const isBlogBanned = await this.blogsService.isBlogBanned(postFound.blogId);
     if (isBlogBanned) return res.sendStatus(404);

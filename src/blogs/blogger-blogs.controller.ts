@@ -48,7 +48,6 @@ export class BlogsBloggerController {
     @Query() blogsPaginatorQuery: BlogsPaginator,
     @CurrentUser('id') currentUserId: string,
   ): Promise<BlogsPagination> {
-    console.log(currentUserId);
     const blogs = await this.blogsQueryRepository.findAllBlogsForCurrentUser(
       blogsPaginatorQuery,
       currentUserId,

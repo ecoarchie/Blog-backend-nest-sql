@@ -99,7 +99,10 @@ export class SessionsRepository {
 
   async verifySessionByToken(token: string): Promise<Session | null> {
     try {
-      const tokenData: any = jwt.verify(token, process.env.SECRET as jwt.Secret);
+      const tokenData: any = jwt.verify(
+        token,
+        process.env.SECRET as jwt.Secret,
+      );
       if (tokenData.exp < Date.now() / 1000) {
         return null;
       }
@@ -174,7 +177,6 @@ export class SessionsRepository {
     const foundDeviceSession = await this.dataSource.query(sessionQuery, [
       deviceId,
     ]);
-    console.log(foundDeviceSession);
     if (foundDeviceSession.length === 0) {
       throw new NotFoundException();
     }

@@ -114,7 +114,6 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const refreshToken = req.cookies?.refreshToken;
-    console.log(refreshToken);
     if (!refreshToken) return res.sendStatus(401);
 
     const result = await this.authService.refreshTokens(
@@ -134,7 +133,6 @@ export class AuthController {
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.refreshToken;
-    console.log(refreshToken);
     if (!refreshToken) return res.sendStatus(401);
 
     await this.usersService.logoutUser(refreshToken);

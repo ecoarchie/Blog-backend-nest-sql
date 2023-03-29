@@ -17,7 +17,6 @@ export class SessionsController {
   @Get('devices')
   async getActiveSessions(@Res() res: Response, @Req() req: Request) {
     const refreshToken = req.cookies?.refreshToken;
-    console.log(refreshToken);
     if (!refreshToken) throw new UnauthorizedException();
 
     const activeSessions = await this.sessionRepo.getActiveSessions(
@@ -29,7 +28,6 @@ export class SessionsController {
 
   @Delete('devices')
   async deleteRestSessions(@Res() res: Response, @Req() req: Request) {
-    console.log('here cont');
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) throw new UnauthorizedException();
 

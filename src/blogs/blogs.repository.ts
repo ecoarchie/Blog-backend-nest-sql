@@ -1,4 +1,4 @@
-import { Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreatePostDto } from '../posts/dtos/createPost.dto';
 import { BanUserByBloggerDto } from '../users/dtos/ban-user-by-blogger.dto';
@@ -27,7 +27,6 @@ export class BlogsRepository {
       blogDto.websiteUrl,
       currentUserId,
     ]);
-    console.log(result);
     return result[0];
   }
 

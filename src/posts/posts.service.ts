@@ -39,7 +39,6 @@ export class PostsService {
     if (!isUUID(postId)) throw new NotFoundException();
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
     const post = await this.postsRepository.findPostById(postId);
-    console.log(post);
     if (!blog || !post) throw new NotFoundException();
     if (blog.ownerId !== currentUserId) throw new ForbiddenException();
     await this.postsRepository.deletePostById(postId);
