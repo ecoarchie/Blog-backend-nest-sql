@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { BlogsRepository } from '../blogs/blogs.repository';
+import { ReactionUpdate } from '../comments/dtos/reactionUpdate.model';
 import { Reaction } from '../reactions/reaction.model';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
@@ -53,5 +54,52 @@ export class PostsService {
     if (!isUUID(postId)) throw new NotFoundException();
     const post = await this.postsRepository.findPostById(postId);
     if (!post) throw new NotFoundException();
+
+    const currentReaction =
+      await this.postsRepository.checkUserReactionForOnePost(
+        postId,
+        currentUserId,
+      );
+    if (currentReaction === likeStatus) return;
+
+    let reactionUpdate: ReactionUpdate;
+    if (likeStatus === 'None') {
+      if (currentReaction === 'Like') {
+        reactionUpdate = {
+          likesCount: -1,
+          dislikesCount: 0,
+        };
+      } else {
+        // currentReaction = 'Dislike'
+        reactionUpdate = {
+          likesCount: 0,
+          dislikesCount: -1,
+        };
+      }
+    } else {
+      if (currentReaction === 'None') {
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 1 : 0,
+          dislikesCount: likeStatus === 'Like' ? 0 : 1,
+        };
+      } else if (currentReaction === 'Like') {
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 0 : -1,
+          dislikesCount: likeStatus === 'Like' ? 0 : 1,
+        };
+      } else {
+        // currentReaction = 'Dislike'
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 1 : 0,
+          dislikesCount: likeStatus === 'Like' ? -1 : 0,
+        };
+      }
+    }
+    await this.postsRepository.updateReactionCount(postId, reactionUpdate);
+    await this.postsRepository.updatePostReactions(
+      postId,
+      currentUserId,
+      likeStatus,
+    );
   }
 }

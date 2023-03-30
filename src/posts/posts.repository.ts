@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { ReactionUpdate } from '../comments/dtos/reactionUpdate.model';
+import { Reaction } from '../reactions/reaction.model';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 
 @Injectable()
@@ -58,5 +60,67 @@ export class PostsRepository {
     DELETE FROM public.blogposts
 `;
     await this.dataSource.query(query);
+  }
+
+  async checkUserReactionForOnePost(
+    postId: string,
+    currentUserId: string,
+  ): Promise<Reaction> {
+    const query = `
+      SELECT reaction FROM public."postsReactions"
+      WHERE "postId"=$1 AND "userId"=$2
+    `;
+
+    const res = await this.dataSource.query(query, [postId, currentUserId]);
+    if (res.length === 0) return 'None';
+    return res[0].reaction;
+  }
+
+  async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
+    const query = `
+      UPDATE public.blogposts
+	    SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
+	    WHERE id=$3;
+    `;
+    await this.dataSource.query(query, [
+      reactionUpdate.likesCount,
+      reactionUpdate.dislikesCount,
+      commentId,
+    ]);
+  }
+
+  async updatePostReactions(
+    postId: string,
+    currentUserId: string,
+    likeStatus: string,
+  ): Promise<void> {
+    const reactionQuery = `
+      SELECT * FROM public."postsReactions"
+      WHERE "postId"=$1 AND "userId"=$2
+    `;
+    const reactionRes = await this.dataSource.query(reactionQuery, [
+      postId,
+      currentUserId,
+    ]);
+
+    const insertQuery = `
+      INSERT INTO public."postsReactions"(
+	    "postId", "userId", reaction)
+	    VALUES ($1, $2, $3);
+    `;
+    const updateQuery = `
+      UPDATE public."postsReactions"
+	    SET  reaction=$1
+	    WHERE id=$2;
+    `;
+    if (reactionRes.length === 0) {
+      await this.dataSource.query(insertQuery, [
+        postId,
+        currentUserId,
+        likeStatus,
+      ]);
+    } else {
+      await this.dataSource.query(updateQuery, [likeStatus, reactionRes[0].id]);
+    }
   }
 }

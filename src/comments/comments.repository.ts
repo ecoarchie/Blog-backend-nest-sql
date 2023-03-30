@@ -49,7 +49,7 @@ export class CommentsRepository {
   }
 
   async checkUserReactionForOneComment(
-    commentId: any,
+    commentId: string,
     currentUserId: string,
   ): Promise<Reaction> {
     const query = `
