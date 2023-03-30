@@ -127,32 +127,36 @@ export class CommentsService {
           likesCount: -1,
           dislikesCount: 0,
         };
-        await this.commentsRepository.updateReactionCount(
-          commentId,
-          reactionUpdate,
-        );
-      } else if (currentReaction === 'Dislike') {
+      } else {
+        // currentReaction = 'Dislike'
         reactionUpdate = {
           likesCount: 0,
           dislikesCount: -1,
         };
-        await this.commentsRepository.updateReactionCount(
-          commentId,
-          reactionUpdate,
-        );
+      }
+    } else {
+      if (currentReaction === 'None') {
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 1 : 0,
+          dislikesCount: likeStatus === 'Like' ? 0 : 1,
+        };
+      } else if (currentReaction === 'Like') {
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 0 : -1,
+          dislikesCount: likeStatus === 'Like' ? 0 : 1,
+        };
+      } else {
+        // currentReaction = 'Dislike'
+        reactionUpdate = {
+          likesCount: likeStatus === 'Like' ? 1 : 0,
+          dislikesCount: likeStatus === 'Like' ? -1 : 0,
+        };
       }
     }
-
-    if (currentReaction === 'None') {
-      reactionUpdate = {
-        likesCount: likeStatus === 'Like' ? 1 : -1,
-        dislikesCount: likeStatus === 'Like' ? -1 : 1,
-      };
-      await this.commentsRepository.updateReactionCount(
-        commentId,
-        reactionUpdate,
-      );
-    }
+    await this.commentsRepository.updateReactionCount(
+      commentId,
+      reactionUpdate,
+    );
     await this.commentsRepository.updateCommentsReactions(
       commentId,
       currentUserId,

@@ -120,18 +120,18 @@ export class PostsController {
     res.send(comments);
   }
 
-  // @HttpCode(204)
-  // @UseGuards(BearerAuthGuard)
-  // @Put(':postId/like-status')
-  // async reactToPost(
-  //   @Param('postId') postId: string,
-  //   @Body() likeStatusDto: LikeInputDto,
-  //   @CurrentUser('id') currentUserId: string,
-  // ) {
-  //   await this.postService.reactToPost(
-  //     currentUserId,
-  //     postId,
-  //     likeStatusDto.likeStatus,
-  //   );
-  // }
+  @HttpCode(204)
+  @UseGuards(BearerAuthGuard)
+  @Put(':postId/like-status')
+  async reactToPost(
+    @Param('postId') postId: string,
+    @Body() likeStatusDto: LikeInputDto,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    await this.postService.reactToPost(
+      currentUserId,
+      postId,
+      likeStatusDto.likeStatus,
+    );
+  }
 }

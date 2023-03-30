@@ -30,7 +30,6 @@ export class CommentsRepository {
       postId,
       commentatorId,
     ]);
-    console.log(result);
     return result[0].id;
   }
 
@@ -60,7 +59,7 @@ export class CommentsRepository {
 
     const res = await this.dataSource.query(query, [commentId, currentUserId]);
     if (res.length === 0) return 'None';
-    return res[0];
+    return res[0].reaction;
   }
 
   async checkUserReactionForManyComments(

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { BlogsRepository } from '../blogs/blogs.repository';
+import { Reaction } from '../reactions/reaction.model';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
 
@@ -44,9 +45,13 @@ export class PostsService {
     await this.postsRepository.deletePostById(postId);
   }
 
-  // async reactToPost(currentUserId: string, postId: string, likeStatus: string) {
-  //   if (!isUUID(postId)) throw new NotFoundException();
-  //   const post = await this.postsRepository.findPostById(postId);
-  //   if (!post) throw new NotFoundException();
-  // }
+  async reactToPost(
+    currentUserId: string,
+    postId: string,
+    likeStatus: Reaction,
+  ) {
+    if (!isUUID(postId)) throw new NotFoundException();
+    const post = await this.postsRepository.findPostById(postId);
+    if (!post) throw new NotFoundException();
+  }
 }
