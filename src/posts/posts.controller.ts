@@ -26,6 +26,7 @@ import { CommentsService } from '../comments/comments.service';
 import { CommentsQueryRepository } from '../comments/comments.query-repository';
 import { CommentsRepository } from '../comments/comments.repository';
 import { CommentPaginator } from '../comments/dtos/comment-paginator.dto';
+import { LikeInputDto } from '../reactions/likeInput.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -119,18 +120,18 @@ export class PostsController {
     res.send(comments);
   }
 
-  @HttpCode(204)
-  @UseGuards(BearerAuthGuard)
-  @Put(':postId/like-status')
-  async reactToPost(
-    @Param('postId') postId: string,
-    @Body() likeStatusDto: LikeInputDto,
-    @CurrentUser('id') currentUserId: string,
-  ) {
-    await this.postService.reactToPost(
-      currentUserId,
-      postId,
-      likeStatusDto.likeStatus,
-    );
-  }
+  // @HttpCode(204)
+  // @UseGuards(BearerAuthGuard)
+  // @Put(':postId/like-status')
+  // async reactToPost(
+  //   @Param('postId') postId: string,
+  //   @Body() likeStatusDto: LikeInputDto,
+  //   @CurrentUser('id') currentUserId: string,
+  // ) {
+  //   await this.postService.reactToPost(
+  //     currentUserId,
+  //     postId,
+  //     likeStatusDto.likeStatus,
+  //   );
+  // }
 }

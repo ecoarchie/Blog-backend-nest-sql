@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PostsRepository } from '../posts/posts.repository';
 import { Reaction } from '../reactions/reaction.model';
 import { CommentsQueryRepository } from './comments.query-repository';
@@ -30,17 +34,16 @@ export class CommentsService {
     return commentId;
   }
 
-  async findCommentByIdWithReaction(
-    newCommentId: string,
-    currentUserId: string,
-  ) {
+  async findCommentByIdWithReaction(commentId: string, currentUserId: string) {
     const comment =
       await this.commentsRepository.findCommentWithCommentatorInfoById(
-        newCommentId,
+        commentId,
       );
+    if (!comment) return null;
+
     const currentUserReaction =
       await this.commentsRepository.checkUserReactionForOneComment(
-        newCommentId,
+        commentId,
         currentUserId,
       );
     comment.myStatus = currentUserReaction;
@@ -71,6 +74,17 @@ export class CommentsService {
       totalCount,
       items: commentsWithReactions.map(this.toViewModel),
     };
+  }
+
+  async deleteCommentById(commentId: string, currentUserId: string) {
+    const comment =
+      await this.commentsRepository.findCommentWithCommentatorInfoById(
+        commentId,
+      );
+    if (!comment) throw new NotFoundException();
+
+    if (comment.commentatorId !== currentUserId) throw new ForbiddenException();
+    await this.commentsRepository.deleteById(commentId);
   }
 
   private toViewModel(comment: CommentViewModel) {

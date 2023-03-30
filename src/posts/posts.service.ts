@@ -43,4 +43,10 @@ export class PostsService {
     if (blog.ownerId !== currentUserId) throw new ForbiddenException();
     await this.postsRepository.deletePostById(postId);
   }
+
+  // async reactToPost(currentUserId: string, postId: string, likeStatus: string) {
+  //   if (!isUUID(postId)) throw new NotFoundException();
+  //   const post = await this.postsRepository.findPostById(postId);
+  //   if (!post) throw new NotFoundException();
+  // }
 }

@@ -14,3 +14,5 @@ export interface CommentViewModel extends Comment {
   commentatorLogin: string;
   myStatus: Reaction;
 }
+
+// comment

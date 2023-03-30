@@ -33,7 +33,9 @@ export class CommentsRepository {
     return result[0].id;
   }
 
-  async findCommentWithCommentatorInfoById(commentId: any) {
+  async findCommentWithCommentatorInfoById(
+    commentId: string,
+  ): Promise<CommentViewModel | null> {
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
       users.login "commentatorLogin", c."createdAt", c."likesCount",
@@ -102,5 +104,13 @@ export class CommentsRepository {
     `;
     const qtyRes = await this.dataSource.query(query, [postId]);
     return Number(qtyRes[0].count);
+  }
+
+  async deleteById(commentId: string) {
+    const query = `
+      DELETE FROM public.comments
+	    WHERE id=$1;
+    `;
+    await this.dataSource.query(query, [commentId]);
   }
 }
