@@ -8,6 +8,7 @@ import { Reaction } from '../reactions/reaction.model';
 import { CommentsQueryRepository } from './comments.query-repository';
 import { CommentsRepository } from './comments.repository';
 import { CommentPaginator } from './dtos/comment-paginator.dto';
+import { ReactionUpdate } from './dtos/reactionUpdate.model';
 import { Comment, CommentViewModel } from './entities/comment.entity';
 
 @Injectable()
@@ -85,6 +86,78 @@ export class CommentsService {
 
     if (comment.commentatorId !== currentUserId) throw new ForbiddenException();
     await this.commentsRepository.deleteById(commentId);
+  }
+
+  async updateCommentById(
+    commentId: string,
+    content: string,
+    currentUserId: string,
+  ): Promise<void> {
+    const comment =
+      await this.commentsRepository.findCommentWithCommentatorInfoById(
+        commentId,
+      );
+    if (!comment) throw new NotFoundException();
+
+    if (comment.commentatorId !== currentUserId) throw new ForbiddenException();
+    await this.commentsRepository.updateContent(commentId, content);
+  }
+
+  async reactToComment(
+    currentUserId: string,
+    commentId: string,
+    likeStatus: Reaction,
+  ) {
+    const comment =
+      await this.commentsRepository.findCommentWithCommentatorInfoById(
+        commentId,
+      );
+    if (!comment) throw new NotFoundException();
+    const currentReaction =
+      await this.commentsRepository.checkUserReactionForOneComment(
+        commentId,
+        currentUserId,
+      );
+    if (currentReaction === likeStatus) return;
+
+    let reactionUpdate: ReactionUpdate;
+    if (likeStatus === 'None') {
+      if (currentReaction === 'Like') {
+        reactionUpdate = {
+          likesCount: -1,
+          dislikesCount: 0,
+        };
+        await this.commentsRepository.updateReactionCount(
+          commentId,
+          reactionUpdate,
+        );
+      } else if (currentReaction === 'Dislike') {
+        reactionUpdate = {
+          likesCount: 0,
+          dislikesCount: -1,
+        };
+        await this.commentsRepository.updateReactionCount(
+          commentId,
+          reactionUpdate,
+        );
+      }
+    }
+
+    if (currentReaction === 'None') {
+      reactionUpdate = {
+        likesCount: likeStatus === 'Like' ? 1 : -1,
+        dislikesCount: likeStatus === 'Like' ? -1 : 1,
+      };
+      await this.commentsRepository.updateReactionCount(
+        commentId,
+        reactionUpdate,
+      );
+    }
+    await this.commentsRepository.updateCommentsReactions(
+      commentId,
+      currentUserId,
+      likeStatus,
+    );
   }
 
   private toViewModel(comment: CommentViewModel) {

@@ -49,34 +49,33 @@ export class CommentsController {
     await this.commentsService.deleteCommentById(commentId, currentUserId);
   }
 
-  // @HttpCode(204)
-  // @UseGuards(BearerAuthGuard)
-  // @Put(':commentId')
-  // async updateCommentById(
-  //   @Param('commentId') commentId: string,
-  //   @Body() updateCommentDto: UpdateCommentDto,
-  //   @CurrentUser('id') currentUserId: string,
-  // ) {
-  //   await this.commentsService.updateCommentById(
-  //     commentId,
-  //     updateCommentDto.content,
-  //     currentUserId,
-  //   );
-  // }
+  @HttpCode(204)
+  @UseGuards(BearerAuthGuard)
+  @Put(':commentId')
+  async updateCommentById(
+    @Param('commentId') commentId: string,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    await this.commentsService.updateCommentById(
+      commentId,
+      updateCommentDto.content,
+      currentUserId,
+    );
+  }
 
-  // @HttpCode(204)
-  // @UseGuards(BearerAuthGuard)
-  // @Put(':commentId/like-status')
-  // async reactToComment(
-  //   @Param('commentId') commentId: string,
-  //   @Body() likeStatusDto: LikeInputDto,
-  //   @CurrentUser('id') currentUserId: string,
-  // ) {
-  //   // const userLogin = await this.usersQueryRepo.getUserLoginById(currentUserId);
-  //   await this.commentsService.reactToComment(
-  //     currentUserId,
-  //     commentId,
-  //     likeStatusDto.likeStatus,
-  //   );
-  // }
+  @HttpCode(204)
+  @UseGuards(BearerAuthGuard)
+  @Put(':commentId/like-status')
+  async reactToComment(
+    @Param('commentId') commentId: string,
+    @Body() likeStatusDto: LikeInputDto,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    await this.commentsService.reactToComment(
+      currentUserId,
+      commentId,
+      likeStatusDto.likeStatus,
+    );
+  }
 }

@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Reaction } from '../reactions/reaction.model';
 import { CommentPaginator } from './dtos/comment-paginator.dto';
+import { ReactionUpdate } from './dtos/reactionUpdate.model';
 import { CommentViewModel } from './entities/comment.entity';
 
 @Injectable()
@@ -49,7 +50,7 @@ export class CommentsRepository {
   }
 
   async checkUserReactionForOneComment(
-    newCommentId: any,
+    commentId: any,
     currentUserId: string,
   ): Promise<Reaction> {
     const query = `
@@ -57,10 +58,7 @@ export class CommentsRepository {
       WHERE "commentId"=$1 AND "userId"=$2
     `;
 
-    const res = await this.dataSource.query(query, [
-      newCommentId,
-      currentUserId,
-    ]);
+    const res = await this.dataSource.query(query, [commentId, currentUserId]);
     if (res.length === 0) return 'None';
     return res[0];
   }
@@ -112,5 +110,62 @@ export class CommentsRepository {
 	    WHERE id=$1;
     `;
     await this.dataSource.query(query, [commentId]);
+  }
+
+  async updateContent(commentId: string, content: string) {
+    const query = `
+      UPDATE public.comments
+	    SET content=$1
+	    WHERE id=$2;
+    `;
+    await this.dataSource.query(query, [content, commentId]);
+  }
+
+  async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
+    const query = `
+      UPDATE public.comments
+	    SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
+	    WHERE id=$3;
+    `;
+    await this.dataSource.query(query, [
+      reactionUpdate.likesCount,
+      reactionUpdate.dislikesCount,
+      commentId,
+    ]);
+  }
+
+  async updateCommentsReactions(
+    commentId: string,
+    currentUserId: string,
+    likeStatus: string,
+  ): Promise<void> {
+    const reactionQuery = `
+      SELECT * FROM public."commentsReactions"
+      WHERE "commentId"=$1 AND "userId"=$2
+    `;
+    const reactionRes = await this.dataSource.query(reactionQuery, [
+      commentId,
+      currentUserId,
+    ]);
+
+    const insertQuery = `
+      INSERT INTO public."commentsReactions"(
+	    "commentId", "userId", reaction)
+	    VALUES ($1, $2, $3);
+    `;
+    const updateQuery = `
+      UPDATE public."commentsReactions"
+	    SET  reaction=$1
+	    WHERE id=$2;
+    `;
+    if (reactionRes.length === 0) {
+      await this.dataSource.query(insertQuery, [
+        commentId,
+        currentUserId,
+        likeStatus,
+      ]);
+    } else {
+      await this.dataSource.query(updateQuery, [likeStatus, reactionRes[0].id]);
+    }
   }
 }
