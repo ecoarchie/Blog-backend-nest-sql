@@ -6,6 +6,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { BlogsModule } from '../blogs/blogs.module';
+import { CommentsModule } from '../comments/comments.module';
 import { AccessTokenValidationMiddleware } from '../middlewares/accessTokenCheck.middleware';
 import { UsersModule } from '../users/users.module';
 import { JwtService } from '../utils/jwt.service';
@@ -17,7 +18,11 @@ import { PostsService } from './posts.service';
 @Module({
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, PostsQueryRepository, JwtService],
-  imports: [forwardRef(() => BlogsModule), forwardRef(() => UsersModule)],
+  imports: [
+    forwardRef(() => BlogsModule),
+    forwardRef(() => UsersModule),
+    forwardRef(() => CommentsModule),
+  ],
   exports: [PostsQueryRepository, PostsRepository, PostsService],
 })
 export class PostsModule implements NestModule {

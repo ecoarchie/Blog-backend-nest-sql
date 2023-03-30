@@ -198,6 +198,16 @@ export class UsersRepository {
     await this.dataSource.query(query, values);
   }
 
+  async findBannedUserForBlog(blogId: string, userId: string) {
+    const query = `
+      SELECT * FROM public.banned_users_for_blogs
+      WHERE "userId"=$1 AND "blogId"=$2
+    `;
+
+    const bannedUser = await this.dataSource.query(query, [userId, blogId]);
+    return bannedUser[0];
+  }
+
   async deleteAllUsers() {
     const query = `
     DELETE FROM public.users

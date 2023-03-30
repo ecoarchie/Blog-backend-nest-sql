@@ -140,4 +140,16 @@ export class BlogsService {
     if (!blog || !blog.isBanned) return false;
     return true;
   }
+
+  async isUserBannedForCurrentBlog(
+    blogId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const bannedUser = await this.usersRepository.findBannedUserForBlog(
+      blogId,
+      userId,
+    );
+    if (!bannedUser) return false;
+    return bannedUser.isBanned;
+  }
 }

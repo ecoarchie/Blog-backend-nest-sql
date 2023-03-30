@@ -16,10 +16,8 @@ export class PostsQueryRepository {
       ORDER BY blogposts."createdAt" DESC
       LIMIT 1;
       `;
-    const result = await this.dataSource.query(query, [
-      blogId,
-    ]);
-    const post: BlogPost & {blogName: string} = result[0];
+    const result = await this.dataSource.query(query, [blogId]);
+    const post: BlogPost & { blogName: string } = result[0];
     return {
       id: post.id,
       title: post.title,
@@ -69,10 +67,15 @@ export class PostsQueryRepository {
   }
 
   async findPostById(postId: string, currentUserId: string) {
-      throw new Error('Method not implemented.');
+    const query = `
+      SELECT * FROM public.blogposts
+      WHERE id=$1
+    `;
+    const post = await this.dataSource.query(query, [postId]);
+    return post[0];
   }
 
-  toPostsViewModel(post: BlogPost & {blogName: string}) {
+  toPostsViewModel(post: BlogPost & { blogName: string }) {
     return {
       id: post.id,
       title: post.title,
@@ -85,8 +88,8 @@ export class PostsQueryRepository {
         likesCount: 0,
         dislikesCount: 0,
         myStatus: 'None',
-        newestLikes: []
-      }
-    }
+        newestLikes: [],
+      },
+    };
   }
 }
