@@ -3,7 +3,7 @@ import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
 import { Pagination } from '../../users/dtos/paginator';
 import { SortDirection } from '../../users/dtos/users-paginator';
 
-export class CommentPaginator {
+export class CommentsPaginator {
   @IsString()
   @IsOptional()
   sortBy = 'createdAt';

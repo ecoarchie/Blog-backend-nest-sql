@@ -21,11 +21,8 @@ import { BearerAuthGuard } from '../users/guards/bearer.auth.guard';
 import { PostPaginator } from './dtos/post-paginator';
 import { PostsRepository } from './posts.repository';
 import { CreateCommentDto } from '../comments/dtos/createComment.dto';
-import { CurrentUserRequest } from '../users/dtos/currentUser.dto';
 import { CommentsService } from '../comments/comments.service';
-import { CommentsQueryRepository } from '../comments/comments.query-repository';
-import { CommentsRepository } from '../comments/comments.repository';
-import { CommentPaginator } from '../comments/dtos/comment-paginator.dto';
+import { CommentsPaginator } from '../comments/dtos/comment-paginator.dto';
 import { LikeInputDto } from '../reactions/likeInput.dto';
 
 @Controller('posts')
@@ -35,8 +32,6 @@ export class PostsController {
     private readonly postsRepository: PostsRepository,
     private readonly postService: PostsService,
     private readonly commentsService: CommentsService,
-    private readonly commentsQueryRepo: CommentsQueryRepository,
-    private readonly commentsRepo: CommentsRepository,
     private readonly blogsService: BlogsService,
   ) {}
 
@@ -102,7 +97,7 @@ export class PostsController {
   @Get(':postId/comments')
   async getCommentsForPost(
     @Param('postId') postId: string,
-    @Query() commentsPaginator: CommentPaginator,
+    @Query() commentsPaginator: CommentsPaginator,
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {

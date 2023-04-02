@@ -17,21 +17,23 @@ import { PostsQueryRepository } from '../posts/posts.query-repository';
 import { PostsService } from '../posts/posts.service';
 import { BearerAuthGuard } from '../users/guards/bearer.auth.guard';
 import { BlogsQueryRepository } from './blogs.query-repository';
-import { BlogsRepository } from './blogs.repository';
 import { BlogsService } from './blogs.service';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 import { CreateBlogDto } from './dtos/createBlog.dto';
 import { UpdateBlogDto } from './dtos/updateBlogDto';
 import { Blog } from './entities/blog.entity';
+import { CommentsPaginator } from '../comments/dtos/comment-paginator.dto';
+import { CommentsQueryRepository } from '../comments/comments.query-repository';
 
 @UseGuards(BearerAuthGuard)
 @Controller('blogger/blogs')
 export class BlogsBloggerController {
   constructor(
-    private readonly blogsQueryRepository: BlogsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly blogsService: BlogsService, // private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly postsQueryRepository: PostsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
-    private readonly postsService: PostsService, // private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly blogsQueryRepository: BlogsQueryRepository,
+    private readonly blogsService: BlogsService,
+    private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsService: PostsService,
+    private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
   @Post()
@@ -118,21 +120,15 @@ export class BlogsBloggerController {
     await this.postsService.deletePostById(blogId, postId, currentUserId);
   }
 
-  // @Get('comments')
-  // async getAllCommentsForAllPostsOfCurrentUser(
-  //   @Query() commentPaginationQuery: CommentsPaginationOptions,
-  //   @CurrentUser('id') currentUserId: string,
-  // ) {
-  //   const allUsersPosts =
-  //     await this.blogsQueryRepository.findAllPostsForAllBlogsOfCurrentUser(
-  //       currentUserId,
-  //     );
-
-  //   const paginator = new CommentsPaginationOptions(commentPaginationQuery);
-  //   const comments = await this.commentsQueryRepo.findAllCommentsForPosts(
-  //     allUsersPosts,
-  //     paginator,
-  //   );
-  //   return comments;
-  // }
+  @Get('comments')
+  async getAllCommentsForAllPostsOfCurrentUser(
+    @Query() paginator: CommentsPaginator,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    const comments = await this.commentsQueryRepository.findAllCommentsForPosts(
+      currentUserId,
+      paginator,
+    );
+    return comments;
+  }
 }

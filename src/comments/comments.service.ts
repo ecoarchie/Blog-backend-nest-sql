@@ -7,7 +7,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { Reaction } from '../reactions/reaction.model';
 import { CommentsQueryRepository } from './comments.query-repository';
 import { CommentsRepository } from './comments.repository';
-import { CommentPaginator } from './dtos/comment-paginator.dto';
+import { CommentsPaginator } from './dtos/comment-paginator.dto';
 import { ReactionUpdate } from './dtos/reactionUpdate.model';
 import { Comment, CommentViewModel } from './entities/comment.entity';
 
@@ -54,7 +54,7 @@ export class CommentsService {
   async findCommentsForPost(
     currentUserId: string,
     postId: string,
-    commentsPaginator: CommentPaginator,
+    commentsPaginator: CommentsPaginator,
   ) {
     const post = await this.postsRepository.findPostById(postId);
     if (!post) throw new NotFoundException();

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Reaction } from '../reactions/reaction.model';
-import { CommentPaginator } from './dtos/comment-paginator.dto';
+import { CommentsPaginator } from './dtos/comment-paginator.dto';
 import { ReactionUpdate } from './dtos/reactionUpdate.model';
 import { CommentViewModel } from './entities/comment.entity';
 
