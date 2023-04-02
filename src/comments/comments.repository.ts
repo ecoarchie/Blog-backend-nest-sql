@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Reaction } from '../reactions/reaction.model';
-import { CommentsPaginator } from './dtos/comment-paginator.dto';
+import {
+  CommentPagination,
+  CommentsPaginator,
+} from './dtos/comment-paginator.dto';
 import { ReactionUpdate } from './dtos/reactionUpdate.model';
 import { CommentViewModel } from './entities/comment.entity';
 
@@ -82,15 +85,28 @@ export class CommentsRepository {
     });
   }
 
-  async findCommentsForPost(postId: string): Promise<CommentViewModel[]> {
+  async findCommentsForPost(
+    postId: string,
+    paginator: CommentsPaginator,
+  ): Promise<CommentViewModel[]> {
+    const sortBy = paginator.sortBy;
+    const sortDirection = paginator.sortDirection;
+    const pageSize = paginator.pageSize;
+    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
       users.login "commentatorLogin", c."createdAt", c."likesCount",
       c."dislikesCount" FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c."postId"=$1
+      ORDER BY "${sortBy}" ${sortDirection}
+      LIMIT $2 OFFSET $3 
     `;
-    const comments = await this.dataSource.query(query, [postId]);
+    const comments = await this.dataSource.query(query, [
+      postId,
+      pageSize,
+      skip,
+    ]);
     return comments;
   }
 

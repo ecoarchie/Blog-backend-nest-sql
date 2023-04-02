@@ -44,7 +44,7 @@ export class PostsQueryRepository {
       (postsPaginatorQuery.pageNumber - 1) * postsPaginatorQuery.pageSize;
     const query = `
     SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName" 
-    blogposts."likesCount", blogposts."dislikesCount"
+    bp."likesCount", bp."dislikesCount"
     FROM public.blogposts bp
     LEFT JOIN blogs ON blogs.id = bp."blogId"
     ORDER BY "${sortBy}" ${sortDirection}

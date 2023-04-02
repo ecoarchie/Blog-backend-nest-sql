@@ -58,7 +58,10 @@ export class CommentsService {
   ) {
     const post = await this.postsRepository.findPostById(postId);
     if (!post) throw new NotFoundException();
-    const comments = await this.commentsRepository.findCommentsForPost(postId);
+    const comments = await this.commentsRepository.findCommentsForPost(
+      postId,
+      commentsPaginator,
+    );
     const commentsWithReactions =
       await this.commentsRepository.checkUserReactionForManyComments(
         comments,
