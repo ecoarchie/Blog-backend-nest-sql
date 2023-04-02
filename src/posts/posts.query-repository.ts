@@ -3,6 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostPaginator, PostsPagination } from './dtos/post-paginator';
 import { BlogPost } from './entities/blogpost.entity';
+import { PostViewModel } from './models/post-view.model';
+import { PostDbModel } from './models/post-from-db.model';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -18,7 +20,7 @@ export class PostsQueryRepository {
       LIMIT 1;
       `;
     const result = await this.dataSource.query(query, [blogId]);
-    const post: BlogPost & { blogName: string } = result[0];
+    const post: PostDbModel = result[0];
     return {
       id: post.id,
       title: post.title,
@@ -69,56 +71,41 @@ export class PostsQueryRepository {
     };
   }
 
-  async findAllPostsForBlog(
-    blogId: string,
-    paginator: PostPaginator,
-    currentUserId: string | null,
-  ) {
-    const sortBy = paginator.sortBy;
-    const sortDirection = paginator.sortDirection;
-    const pageSize = paginator.pageSize;
-    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
-    const query = `
-    SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName", 
-    bp."likesCount", bp."dislikesCount", pr.reaction
-    FROM public.blogposts bp 
-    LEFT JOIN blogs ON blogs.id = bp."blogId"
-    LEFT JOIN "postsReactions" pr ON pr."postId" = bp.id
-    WHERE blogs.id = $3 AND pr."userId" = $4
-    ORDER BY "${sortBy}" ${sortDirection}
-    LIMIT $1 OFFSET $2 
-    `;
-    const values = [pageSize, skip, blogId, currentUserId ? currentUserId : ''];
-    const posts = await this.dataSource.query(query, values);
-
+  async countAllPostsForBlog(blogId: string): Promise<number> {
     const totalCountQuery = `
     SELECT COUNT(blogposts.id) FROM public.blogposts
     LEFT JOIN blogs ON blogs.id = blogposts."blogId"
     WHERE blogs.id = $1
     `;
     const result = await this.dataSource.query(totalCountQuery, [blogId]);
-    const totalCount = Number(result[0].count);
+    return Number(result[0].count);
+  }
 
-    const pagesCount = Math.ceil(totalCount / paginator.pageSize);
+  async findAllPostsForBlog(
+    blogId: string,
+    paginator: PostPaginator,
+    // currentUserId: string | null,
+  ): Promise<PostDbModel[]> {
+    const sortBy = paginator.sortBy;
+    const sortDirection = paginator.sortDirection;
+    const pageSize = paginator.pageSize;
+    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
+    const query = `
+    SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName", 
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $4) as "likesCount",
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $5) as "dislikesCount"
+    FROM public.blogposts bp 
+    LEFT JOIN blogs ON blogs.id = bp."blogId"
+    WHERE blogs.id = $3 
+    ORDER BY "${sortBy}" ${sortDirection}
+    LIMIT $1 OFFSET $2 
+    `;
+    const values = [pageSize, skip, blogId, 'Like', 'Dislike'];
+    const posts = await this.dataSource.query(query, values);
 
-    const postIds = posts.map((p: any) => p.id);
-    const newestLikes = await this.findNewestLikes(postIds);
-    return {
-      pagesCount,
-      page: paginator.pageNumber,
-      pageSize: paginator.pageSize,
-      totalCount,
-      items: posts.map(this.toPostsViewModel).map((p: any) => {
-        p.extendedLikesInfo.newestLikes = newestLikes.filter(
-          (l: any) => l.postId === p.id,
-        );
-        p.extendedLikesInfo.newestLikes.map((p: any) => {
-          delete p['postId'];
-          return p;
-        });
-        return p;
-      }),
-    };
+    return posts;
   }
 
   async findNewestLikes(postIds: string[]) {
@@ -128,7 +115,7 @@ export class PostsQueryRepository {
       pr.*, u.login
       FROM "postsReactions" pr 
       LEFT JOIN users u ON u.id = pr."userId" 
-      WHERE "postId" = ANY ($1) AND reaction = $2) x
+      WHERE "postId" = ANY($1) AND reaction = $2) x
       WHERE x.r <= 3;
     `;
     const reactions = await this.dataSource.query(query, [postIds, 'Like']);
@@ -151,7 +138,7 @@ export class PostsQueryRepository {
     return post[0];
   }
 
-  toPostsViewModel(post: BlogPost & { blogName: string; reaction: string }) {
+  toPostsViewModel(post: PostDbModel) {
     return {
       id: post.id,
       title: post.title,
@@ -163,7 +150,7 @@ export class PostsQueryRepository {
       extendedLikesInfo: {
         likesCount: post.likesCount,
         dislikesCount: post.dislikesCount,
-        myStatus: post.reaction,
+        myStatus: '',
         newestLikes: [],
       },
     };

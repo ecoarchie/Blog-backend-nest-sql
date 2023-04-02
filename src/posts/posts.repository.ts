@@ -34,6 +34,15 @@ export class PostsRepository {
     };
   }
 
+  async getUsersReactions(currentUserId: string, postIds: any[]) {
+    const query = `
+      SELECT * FROM public."postsReactions"
+      WHERE "userId"=$1 AND "postId" = ANY($2)
+    `;
+    const res = await this.dataSource.query(query, [currentUserId, postIds]);
+    return res;
+  }
+
   async updatePostById(postId: string, dto: UpdatePostDto) {
     const query = `
     UPDATE public.blogposts

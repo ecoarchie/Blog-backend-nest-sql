@@ -3,6 +3,7 @@ import { AppService } from './app.service';
 import { BlogsRepository } from './blogs/blogs.repository';
 import { PostsRepository } from './posts/posts.repository';
 import { UsersRepository } from './users/repositories/users.repository';
+import { CommentsRepository } from './comments/comments.repository';
 
 @Controller()
 export class AppController {
@@ -11,6 +12,7 @@ export class AppController {
     private readonly usersRepository: UsersRepository,
     private readonly blogsRepository: BlogsRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly commentsRepository: CommentsRepository,
   ) {}
 
   @Get()
@@ -23,7 +25,7 @@ export class AppController {
   async deleteAllData() {
     await this.blogsRepository.deleteAllBlogs();
     await this.postsRepository.deleteAllPosts();
-    // await this.commentsRepository.deleteAllComments();
+    await this.commentsRepository.deleteAllComments();
     await this.usersRepository.deleteAllUsers();
     await this.usersRepository.deleteAllSessions();
   }

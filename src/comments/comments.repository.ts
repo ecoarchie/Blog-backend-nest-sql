@@ -44,9 +44,9 @@ export class CommentsRepository {
       users.login "commentatorLogin", c."createdAt", c."likesCount",
       c."dislikesCount" FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
-      WHERE c.id=$1
+      WHERE c.id=$1 AND users."isBanned" = $2
     `;
-    const res = await this.dataSource.query(query, [commentId]);
+    const res = await this.dataSource.query(query, [commentId, false]);
     if (res.length === 0) return null;
     return res[0];
   }
@@ -125,6 +125,13 @@ export class CommentsRepository {
 	    WHERE id=$1;
     `;
     await this.dataSource.query(query, [commentId]);
+  }
+
+  async deleteAllComments() {
+    const query = `
+      DELETE FROM public.comments
+    `;
+    await this.dataSource.query(query);
   }
 
   async updateContent(commentId: string, content: string) {

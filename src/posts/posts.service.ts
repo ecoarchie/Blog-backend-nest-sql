@@ -10,8 +10,10 @@ import { ReactionUpdate } from '../comments/dtos/reactionUpdate.model';
 import { Reaction } from '../reactions/reaction.model';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
-import { PostPaginator } from './dtos/post-paginator';
+import { PostPaginator, PostsPagination } from './dtos/post-paginator';
 import { PostsQueryRepository } from './posts.query-repository';
+import { PostDbModel } from './models/post-from-db.model';
+import { PostViewModel } from './models/post-view.model';
 
 @Injectable()
 export class PostsService {
@@ -43,16 +45,60 @@ export class PostsService {
     blogId: string,
     paginator: PostPaginator,
     currentUserId: string | null,
-  ) {
-    const blogFound = await this.blogsRepository.findBlogWithOwnerById(blogId);
-    if (!blogFound) throw new NotFoundException();
-
+  ): Promise<PostsPagination> {
     const posts = await this.postsQueryRepository.findAllPostsForBlog(
       blogId,
       paginator,
-      currentUserId,
     );
-    return posts;
+    if (posts.length === 0) throw new NotFoundException();
+    const totalCount = await this.postsQueryRepository.countAllPostsForBlog(
+      blogId,
+    );
+    const pagesCount = Math.ceil(totalCount / paginator.pageSize);
+    const postIds = posts.map((p: any) => p.id);
+    const newestLikes = await this.postsQueryRepository.findNewestLikes(
+      postIds,
+    );
+    let usersReactions = null;
+    if (currentUserId) {
+      usersReactions = await this.postsRepository.getUsersReactions(
+        currentUserId,
+        postIds,
+      );
+    }
+    return {
+      pagesCount,
+      page: paginator.pageNumber,
+      pageSize: paginator.pageSize,
+      totalCount,
+      items: this.toPostsViewModel(posts, usersReactions, newestLikes),
+    };
+  }
+
+  private toPostsViewModel(
+    posts: PostDbModel[],
+    usersReactions: any,
+    newestLikes: any,
+  ): PostViewModel[] {
+    return posts.map((post: any) => {
+      return {
+        id: post.id,
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt,
+        extendedLikesInfo: {
+          likesCount: post.likesCount,
+          dislikesCount: post.dislikesCount,
+          myStatus:
+            usersReactions.find((r: any) => (r.postId = post.id))?.reaction ||
+            'None',
+          newestLikes,
+        },
+      };
+    });
   }
 
   async deletePostById(blogId: string, postId: string, currentUserId: string) {

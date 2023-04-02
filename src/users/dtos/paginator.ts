@@ -1,13 +1,6 @@
-import { User } from "../entities/user.entity";
+import { PaginationView } from '../../common_models/pagination-view.model';
+import { User } from '../entities/user.entity';
 
-export interface Pagination {
-  pagesCount: number;
-  page: number;
-  pageSize: number;
-  totalCount: number;
-}
-
-export interface UsersPagination extends Pagination {
+export interface UsersPagination extends PaginationView {
   items: Partial<User>[];
 }
-

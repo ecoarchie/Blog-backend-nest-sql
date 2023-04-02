@@ -1,8 +1,8 @@
 import { Transform, TransformFnParams } from 'class-transformer';
 import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
-import { Pagination } from '../../users/dtos/paginator';
 import { SortDirection } from '../../users/dtos/users-paginator';
 import { Blog } from '../entities/blog.entity';
+import { PaginationView } from '../../common_models/pagination-view.model';
 
 export class BlogsPaginator {
   @IsString()
@@ -28,6 +28,6 @@ export class BlogsPaginator {
   searchNameTerm: string | null = null;
 }
 
-export interface BlogsPagination extends Pagination {
+export interface BlogsPagination extends PaginationView {
   items: Partial<Blog>[];
 }

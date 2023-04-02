@@ -1,7 +1,7 @@
 import { Transform, TransformFnParams } from 'class-transformer';
 import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
-import { Pagination } from '../../users/dtos/paginator';
 import { SortDirection } from '../../users/dtos/users-paginator';
+import { PaginationView } from '../../common_models/pagination-view.model';
 
 export class CommentsPaginator {
   @IsString()
@@ -23,6 +23,6 @@ export class CommentsPaginator {
   pageSize = 10;
 }
 
-export interface CommentPagination extends Pagination {
+export interface CommentPagination extends PaginationView {
   items: Partial<Comment>[];
 }
