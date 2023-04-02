@@ -2,14 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostPaginator, PostsPagination } from './dtos/post-paginator';
-import { BlogPost } from './entities/blogpost.entity';
-import { PostViewModel } from './models/post-view.model';
 import { PostDbModel } from './models/post-from-db.model';
+import { PostViewModel } from './models/post-view.model';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async findLatestCreatedPostByBlogId(blogId: string) {
+  async findLatestCreatedPostByBlogId(blogId: string): Promise<PostViewModel> {
     const query = `
       SELECT blogposts.id, title, "shortDescription", content, blogposts."createdAt", "blogId", blogs.name "blogName",
       blogposts."likesCount", blogposts."dislikesCount"
@@ -30,45 +29,42 @@ export class PostsQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: post.likesCount,
-        dislikesCount: post.dislikesCount,
+        likesCount: 0,
+        dislikesCount: 0,
         myStatus: 'None',
         newestLikes: [],
       },
     };
   }
 
-  async findAll(currentUserId: string, postsPaginatorQuery: PostPaginator) {
-    const sortBy = postsPaginatorQuery.sortBy;
-    const sortDirection = postsPaginatorQuery.sortDirection;
-    const pageSize = postsPaginatorQuery.pageSize;
-    const skip =
-      (postsPaginatorQuery.pageNumber - 1) * postsPaginatorQuery.pageSize;
+  async findAll(paginator: PostPaginator): Promise<PostDbModel[]> {
+    const sortBy = paginator.sortBy;
+    const sortDirection = paginator.sortDirection;
+    const pageSize = paginator.pageSize;
+    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
     const query = `
-    SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName" 
-    bp."likesCount", bp."dislikesCount"
+    SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName", 
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $3) as "likesCount",
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $4) as "dislikesCount"
     FROM public.blogposts bp
     LEFT JOIN blogs ON blogs.id = bp."blogId"
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $1 OFFSET $2 
     `;
-    const values = [pageSize, skip];
+    const values = [pageSize, skip, 'Like', 'Dislike'];
     const posts = await this.dataSource.query(query, values);
 
+    return posts;
+  }
+
+  async countAllPosts(): Promise<number> {
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.blogposts
     `;
     const result = await this.dataSource.query(totalCountQuery);
-    const totalCount = Number(result[0].count);
-
-    const pagesCount = Math.ceil(totalCount / postsPaginatorQuery.pageSize);
-    return {
-      pagesCount,
-      page: postsPaginatorQuery.pageNumber,
-      pageSize: postsPaginatorQuery.pageSize,
-      totalCount,
-      items: posts.map(this.toPostsViewModel),
-    };
+    return Number(result[0].count);
   }
 
   async countAllPostsForBlog(blogId: string): Promise<number> {
@@ -84,7 +80,6 @@ export class PostsQueryRepository {
   async findAllPostsForBlog(
     blogId: string,
     paginator: PostPaginator,
-    // currentUserId: string | null,
   ): Promise<PostDbModel[]> {
     const sortBy = paginator.sortBy;
     const sortDirection = paginator.sortDirection;
@@ -103,7 +98,10 @@ export class PostsQueryRepository {
     LIMIT $1 OFFSET $2 
     `;
     const values = [pageSize, skip, blogId, 'Like', 'Dislike'];
-    const posts = await this.dataSource.query(query, values);
+    const posts: Promise<PostDbModel[]> = await this.dataSource.query(
+      query,
+      values,
+    );
 
     return posts;
   }
@@ -129,12 +127,19 @@ export class PostsQueryRepository {
     });
   }
 
-  async findPostById(postId: string, currentUserId: string) {
+  async findPostById(postId: string): Promise<PostDbModel | undefined> {
     const query = `
-      SELECT * FROM public.blogposts
-      WHERE id=$1
+    SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName", 
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $2) as "likesCount",
+    (SELECT count(*) FROM public."postsReactions"
+    WHERE "postId" = bp.id AND reaction = $3) as "dislikesCount"
+    FROM public.blogposts bp 
+    LEFT JOIN blogs ON blogs.id = bp."blogId"
+    WHERE bp.id = $1 
     `;
-    const post = await this.dataSource.query(query, [postId]);
+    const values = [postId, 'Like', 'Dislike'];
+    const post = await this.dataSource.query(query, values);
     return post[0];
   }
 

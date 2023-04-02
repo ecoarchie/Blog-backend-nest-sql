@@ -41,7 +41,7 @@ export class PostsController {
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {
-    const posts = await this.postsQueryRepository.findAll(
+    const posts = await this.postService.findAllPosts(
       currentUserId,
       postsPaginatorQuery,
     );
@@ -54,8 +54,10 @@ export class PostsController {
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {
-    const postFound = await this.postsRepository.findPostById(postId);
-    if (!postFound) return res.sendStatus(404);
+    const postFound = await this.postService.findPostById(
+      postId,
+      currentUserId,
+    );
     const isBlogBanned = await this.blogsService.isBlogBanned(postFound.blogId);
     if (isBlogBanned) return res.sendStatus(404);
     res.status(200).send(postFound);
@@ -69,10 +71,7 @@ export class PostsController {
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {
-    const isPostExist = await this.postsQueryRepository.findPostById(
-      postId,
-      currentUserId,
-    );
+    const isPostExist = await this.postsQueryRepository.findPostById(postId);
     if (!isPostExist) throw new NotFoundException();
 
     const isUserBanned = await this.blogsService.isUserBannedForCurrentBlog(
@@ -101,10 +100,7 @@ export class PostsController {
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {
-    const isPostExist = await this.postsQueryRepository.findPostById(
-      postId,
-      currentUserId,
-    );
+    const isPostExist = await this.postsQueryRepository.findPostById(postId);
     if (!isPostExist) throw new NotFoundException();
 
     const comments = await this.commentsService.findCommentsForPost(

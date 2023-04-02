@@ -41,6 +41,48 @@ export class PostsService {
     await this.postsRepository.updatePostById(postId, updatePostDto);
   }
 
+  async findAllPosts(currentUserId: string, paginator: PostPaginator) {
+    const posts = await this.postsQueryRepository.findAll(paginator);
+    if (posts.length === 0) throw new NotFoundException();
+    const totalCount = await this.postsQueryRepository.countAllPosts();
+    const pagesCount = Math.ceil(totalCount / paginator.pageSize);
+    const postIds = posts.map((p: any) => p.id);
+    const newestLikes = await this.postsQueryRepository.findNewestLikes(
+      postIds,
+    );
+    let usersReactions = null;
+    if (currentUserId) {
+      usersReactions = await this.postsRepository.getUsersReactions(
+        currentUserId,
+        postIds,
+      );
+    }
+    return {
+      pagesCount,
+      page: paginator.pageNumber,
+      pageSize: paginator.pageSize,
+      totalCount,
+      items: this.toPostsViewModel(posts, usersReactions, newestLikes),
+    };
+  }
+
+  async findPostById(postId: string, currentUserId: string) {
+    const post = await this.postsQueryRepository.findPostById(postId);
+    if (!post) throw new NotFoundException();
+
+    const newestLikes = await this.postsQueryRepository.findNewestLikes([
+      post.id,
+    ]);
+    let usersReactions = null;
+    if (currentUserId) {
+      usersReactions = await this.postsRepository.getUsersReactions(
+        currentUserId,
+        [post.id],
+      );
+    }
+    return this.toPostsViewModel([post], usersReactions, newestLikes)[0];
+  }
+
   async findAllPostsForBlog(
     blogId: string,
     paginator: PostPaginator,

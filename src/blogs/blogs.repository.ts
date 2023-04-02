@@ -107,7 +107,7 @@ export class BlogsRepository {
     INSERT INTO public.blogposts(title, "shortDescription", content, "blogId")
 	    VALUES ($1, $2, $3, $4)
     `;
-    const result = await this.dataSource.query(query, [
+    await this.dataSource.query(query, [
       createPostDto.title,
       createPostDto.shortDescription,
       createPostDto.content,
