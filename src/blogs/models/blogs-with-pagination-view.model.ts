@@ -1,6 +1,6 @@
 import { PaginationView } from '../../common_models/pagination-view.model';
-import { BlogPost } from '../../posts/entities/blogpost.entity';
+import { BlogPublicViewModel } from './blog-public-view.model';
 
 export class BlogsPagination extends PaginationView {
-  items: Omit<BlogPost, 'ownerId' | 'isBanned' | 'banDate'>;
+  items: BlogPublicViewModel[];
 }

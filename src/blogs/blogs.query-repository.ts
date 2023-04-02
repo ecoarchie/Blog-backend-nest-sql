@@ -3,12 +3,16 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 import { Blog } from './entities/blog.entity';
+import { BlogPublicViewModel } from './models/blog-public-view.model';
+import { BlogSaViewModel } from './models/blog-sa-view.model';
 
 @Injectable()
 export class BlogsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAllBlogs(blogsPaginatorQuery: BlogsPaginator) {
+  async findAllBlogs(
+    blogsPaginatorQuery: BlogsPaginator,
+  ): Promise<BlogsPagination> {
     const searchNameTerm = blogsPaginatorQuery.searchNameTerm
       ? '%' + blogsPaginatorQuery.searchNameTerm + '%'
       : '%';
@@ -24,7 +28,10 @@ export class BlogsQueryRepository {
     LIMIT $2 OFFSET $3 
     `;
     const values = [searchNameTerm, pageSize, skip, false];
-    const blogs = await this.dataSource.query(query, values);
+    const blogs: BlogPublicViewModel[] = await this.dataSource.query(
+      query,
+      values,
+    );
 
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.blogs
@@ -85,7 +92,7 @@ export class BlogsQueryRepository {
     };
   }
 
-  toSaBlogViewModel(b: any) {
+  toSaBlogViewModel(b: any): BlogSaViewModel {
     return {
       id: b.id,
       name: b.name,

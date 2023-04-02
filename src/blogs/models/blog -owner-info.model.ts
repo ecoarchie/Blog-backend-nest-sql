@@ -1,4 +1,4 @@
-export interface IBlogOwnerInfo {
+export interface BlogOwnerInfo {
   userId: string;
   userLogin: string;
 }
