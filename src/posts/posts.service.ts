@@ -10,12 +10,15 @@ import { ReactionUpdate } from '../comments/dtos/reactionUpdate.model';
 import { Reaction } from '../reactions/reaction.model';
 import { UpdatePostDto } from './dtos/updatePost.dto';
 import { PostsRepository } from './posts.repository';
+import { PostPaginator } from './dtos/post-paginator';
+import { PostsQueryRepository } from './posts.query-repository';
 
 @Injectable()
 export class PostsService {
   constructor(
     private blogsRepository: BlogsRepository,
     private postsRepository: PostsRepository,
+    private postsQueryRepository: PostsQueryRepository,
   ) {}
   async updatePostById(
     blogId: string,
@@ -34,6 +37,22 @@ export class PostsService {
         field: 'blogId',
       });
     await this.postsRepository.updatePostById(postId, updatePostDto);
+  }
+
+  async findAllPostsForBlog(
+    blogId: string,
+    paginator: PostPaginator,
+    currentUserId: string | null,
+  ) {
+    const blogFound = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    if (!blogFound) throw new NotFoundException();
+
+    const posts = await this.postsQueryRepository.findAllPostsForBlog(
+      blogId,
+      paginator,
+      currentUserId,
+    );
+    return posts;
   }
 
   async deletePostById(blogId: string, postId: string, currentUserId: string) {

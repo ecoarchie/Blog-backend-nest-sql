@@ -2,18 +2,21 @@ import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { BlogsQueryRepository } from './blogs.query-repository';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
+import { PostPaginator } from '../posts/dtos/post-paginator';
+import { PostsService } from '../posts/posts.service';
+import { CurrentUser } from '../decorators/current-user-param.decorator';
 
 @Controller('blogs')
 export class BlogsPublicController {
   constructor(
     private readonly blogsQueryRepository: BlogsQueryRepository, // private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly postsService: PostsService, // private readonly postsQueryRepository: PostsQueryRepository,
   ) {}
 
   @Get()
   async findAllBlogs(
     @Query() blogsPaginatorQuery: BlogsPaginator,
   ): Promise<BlogsPagination> {
-    // const blogsPaginatorOptions = new BlogPaginatorOptions(blogsPaginatorQuery);
     const blogs = await this.blogsQueryRepository.findAllBlogs(
       blogsPaginatorQuery,
     );
@@ -27,21 +30,20 @@ export class BlogsPublicController {
     return res.status(200).send(blogFound);
   }
 
-  // @Get(':blogId/posts')
-  // async getAllPostForBlog(
-  //   @Param('blogId') blogId: string,
-  //   @Query() postsPaginatorQuery: PostPaginator,
-  //   @Res() res: Response,
-  //   @Req() req: Request,
-  // ) {
-  //   const blogFound = await this.blogsQueryRepository.findBlogById(blogId);
-  //   if (!blogFound) return res.sendStatus(404);
-
-  //   const posts = await this.postsQueryRepository.findAllPostsForBlog(
-  //     blogId,
-  //     postsPaginatorQuery,
-  //     req.user?.id || null,
-  //   );
-  //   res.send(posts);
-  // }
+  @Get(':blogId/posts')
+  async getAllPostForBlog(
+    @Param('blogId') blogId: string,
+    @Query() paginator: PostPaginator,
+    @CurrentUser('id') currentUserId: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const posts = await this.postsService.findAllPostsForBlog(
+      blogId,
+      paginator,
+      currentUserId,
+    );
+    console.log('here', posts);
+    res.send(posts);
+  }
 }

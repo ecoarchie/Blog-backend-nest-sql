@@ -5,4 +5,6 @@ export class BlogPost {
   content: string;
   blogId: string;
   createdAt: Date;
+  likesCount: number;
+  dislikesCount: number;
 }

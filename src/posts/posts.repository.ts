@@ -109,9 +109,9 @@ export class PostsRepository {
 	    VALUES ($1, $2, $3);
     `;
     const updateQuery = `
-      UPDATE public."postsReactions"
+      UPDATE public."postsReactions" pr
 	    SET  reaction=$1
-	    WHERE id=$2;
+	    WHERE pr."postId"=$2 AND pr."userId"=$3;
     `;
     if (reactionRes.length === 0) {
       await this.dataSource.query(insertQuery, [
@@ -120,7 +120,11 @@ export class PostsRepository {
         likeStatus,
       ]);
     } else {
-      await this.dataSource.query(updateQuery, [likeStatus, reactionRes[0].id]);
+      await this.dataSource.query(updateQuery, [
+        likeStatus,
+        reactionRes[0].postId,
+        reactionRes[0].userId,
+      ]);
     }
   }
 }
