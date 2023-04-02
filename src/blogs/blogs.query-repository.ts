@@ -3,8 +3,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 import { Blog } from './entities/blog.entity';
-import { BlogPublicViewModel } from './models/blog-public-view.model';
-import { BlogSaViewModel } from './models/blog-sa-view.model';
+import { PublicBlogViewModel } from './models/public-blog-view.model';
+import { SaBlogViewModel } from './models/sa-blog-view.model';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -28,7 +28,7 @@ export class BlogsQueryRepository {
     LIMIT $2 OFFSET $3 
     `;
     const values = [searchNameTerm, pageSize, skip, false];
-    const blogs: BlogPublicViewModel[] = await this.dataSource.query(
+    const blogs: PublicBlogViewModel[] = await this.dataSource.query(
       query,
       values,
     );
@@ -92,7 +92,7 @@ export class BlogsQueryRepository {
     };
   }
 
-  toSaBlogViewModel(b: any): BlogSaViewModel {
+  toSaBlogViewModel(b: any): SaBlogViewModel {
     return {
       id: b.id,
       name: b.name,

@@ -1,6 +1,6 @@
 import { Blog } from '../entities/blog.entity';
 
-export type BlogPublicViewModel = Omit<
+export type PublicBlogViewModel = Omit<
   Blog,
   'ownerId' | 'isBanned' | 'banDate'
 >;
