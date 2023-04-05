@@ -133,8 +133,8 @@ export class PostsService {
         blogName: post.blogName,
         createdAt: post.createdAt,
         extendedLikesInfo: {
-          likesCount: post.likesCount,
-          dislikesCount: post.dislikesCount,
+          likesCount: Number(post.likesCount),
+          dislikesCount: Number(post.dislikesCount),
           myStatus:
             usersReactions?.find((r: any) => (r.postId = post.id))?.reaction ||
             'None',

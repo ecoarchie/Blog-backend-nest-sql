@@ -124,7 +124,7 @@ export class PostsQueryRepository {
         addedAt: r.createdAt,
         userId: r.userId,
         login: r.login,
-        postId: r.postId,
+        // postId: r.postId,
       };
     });
   }

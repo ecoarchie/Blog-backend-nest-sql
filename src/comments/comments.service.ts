@@ -177,8 +177,8 @@ export class CommentsService {
       },
       createdAt: comment.createdAt,
       likesInfo: {
-        likesCount: comment.likesCount,
-        dislikesCount: comment.dislikesCount,
+        likesCount: Number(comment.likesCount),
+        dislikesCount: Number(comment.dislikesCount),
         myStatus: comment.myStatus,
       },
     };
