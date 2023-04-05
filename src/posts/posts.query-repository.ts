@@ -107,24 +107,34 @@ export class PostsQueryRepository {
   }
 
   async findNewestLikes(postIds: string[]) {
+    console.log(postIds);
     const query = `
     SELECT * FROM (
-      SELECT ROW_NUMBER() OVER (PARTITION BY "postId" ORDER BY pr."createdAt") AS r,
+      SELECT ROW_NUMBER() OVER (PARTITION BY "postId" ORDER BY pr."createdAt" DESC) AS r,
       pr.*, u.login
-      FROM "postsReactions" pr 
-      LEFT JOIN users u ON u.id = pr."userId" 
-      WHERE "postId" = ANY($1) AND reaction = $2
-      ORDER BY pr."createdAt" DESC) x
+      FROM "postsReactions" pr
+      LEFT JOIN users u ON u.id = pr."userId"
+      WHERE "postId" = ANY($1) AND reaction = $2) x
       WHERE x.r <= 3
       ;
     `;
+    // const query = `
+    //   SELECT "userId", "postId", reaction, "createdAt"
+    //   FROM public."postsReactions"
+    //   WHERE (
+    //     SELECT COUNT(*) FROM public."postsReactions"
+    //     WHERE "postId" = ANY($1) AND reaction = $2
+    //   )<=3
+    //   ORDER BY "createdAt" DESC
+    // `;
     const reactions = await this.dataSource.query(query, [postIds, 'Like']);
+    console.log('reactions', reactions);
     return reactions.map((r: any) => {
       return {
         addedAt: r.createdAt,
         userId: r.userId,
         login: r.login,
-        // postId: r.postId,
+        postId: r.postId,
       };
     });
   }

@@ -43,7 +43,6 @@ export class BlogsPublicController {
       paginator,
       currentUserId,
     );
-    console.log('here', posts);
     res.send(posts);
   }
 }

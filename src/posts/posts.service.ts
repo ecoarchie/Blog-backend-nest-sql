@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
@@ -138,7 +137,13 @@ export class PostsService {
           myStatus:
             usersReactions?.find((r: any) => (r.postId = post.id))?.reaction ||
             'None',
-          newestLikes,
+          newestLikes:
+            newestLikes
+              ?.filter((l: any) => l.postId === post.id)
+              .map((l: any) => {
+                delete l['postId'];
+                return l;
+              }) || [],
         },
       };
     });
