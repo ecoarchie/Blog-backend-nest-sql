@@ -19,8 +19,12 @@ export class AccessTokenValidationMiddleware implements NestMiddleware {
     const token = authorization.split(' ')[1];
 
     const userId = await this.jwtService.getUserIdFromAccessToken(token);
-    const userLogin = await this.usersQueryRepo.getUserLoginById(userId!);
-    
+    console.log(userId);
+    let userLogin = '';
+    if (userId) {
+      userLogin = await this.usersQueryRepo.getUserLoginById(userId!);
+    }
+
     req.user = {
       id: userId!,
       login: userLogin,

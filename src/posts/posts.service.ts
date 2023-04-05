@@ -136,7 +136,7 @@ export class PostsService {
           likesCount: post.likesCount,
           dislikesCount: post.dislikesCount,
           myStatus:
-            usersReactions.find((r: any) => (r.postId = post.id))?.reaction ||
+            usersReactions?.find((r: any) => (r.postId = post.id))?.reaction ||
             'None',
           newestLikes,
         },
