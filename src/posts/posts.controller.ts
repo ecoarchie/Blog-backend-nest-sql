@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  Logger,
   NotFoundException,
   Param,
   Post,

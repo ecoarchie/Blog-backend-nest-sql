@@ -113,8 +113,10 @@ export class PostsQueryRepository {
       pr.*, u.login
       FROM "postsReactions" pr 
       LEFT JOIN users u ON u.id = pr."userId" 
-      WHERE "postId" = ANY($1) AND reaction = $2) x
-      WHERE x.r <= 3;
+      WHERE "postId" = ANY($1) AND reaction = $2
+      ORDER BY pr."createdAt" DESC) x
+      WHERE x.r <= 3
+      ;
     `;
     const reactions = await this.dataSource.query(query, [postIds, 'Like']);
     return reactions.map((r: any) => {
