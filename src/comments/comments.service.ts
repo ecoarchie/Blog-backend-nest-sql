@@ -47,6 +47,7 @@ export class CommentsService {
         commentId,
         currentUserId,
       );
+    console.log(currentUserReaction);
     comment.myStatus = currentUserReaction;
     return this.toViewModel(comment);
   }

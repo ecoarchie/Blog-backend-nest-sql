@@ -31,6 +31,7 @@ export class CommentsController {
     @CurrentUser('id') currentUserId: string,
     @Res() res: Response,
   ) {
+    console.log('currentUserId', currentUserId);
     const commentFound = await this.commentsService.findCommentByIdWithReaction(
       commentId,
       currentUserId,

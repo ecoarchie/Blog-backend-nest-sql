@@ -68,7 +68,6 @@ export class CommentsRepository {
       SELECT reaction FROM public."commentsReactions"
       WHERE "commentId"=$1 AND "userId"=$2
     `;
-
     const res = await this.dataSource.query(query, [commentId, currentUserId]);
     if (res.length === 0) return 'None';
     return res[0].reaction;
