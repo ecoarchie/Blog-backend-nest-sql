@@ -10,8 +10,7 @@ export class PostsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async findLatestCreatedPostByBlogId(blogId: string): Promise<PostViewModel> {
     const query = `
-      SELECT blogposts.id, title, "shortDescription", content, blogposts."createdAt", "blogId", blogs.name "blogName",
-      blogposts."likesCount", blogposts."dislikesCount"
+      SELECT blogposts.id, title, "shortDescription", content, blogposts."createdAt", "blogId", blogs.name "blogName"
 	    FROM public.blogposts
       LEFT JOIN blogs ON blogs.id="blogId"
       WHERE "blogId"=$1
