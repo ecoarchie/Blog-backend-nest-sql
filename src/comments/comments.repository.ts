@@ -42,10 +42,10 @@ export class CommentsRepository {
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
       users.login "commentatorLogin", c."createdAt", 
-      (SELECT count(*) FROM public."commentsReactions"
-      WHERE "commentId" = c.id AND reaction = $3) as "likesCount",
-      (SELECT count(*) FROM public."commentsReactions"
-      WHERE "commentId" = c.id AND reaction = $4) as "dislikesCount"
+      (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
+      WHERE "commentId" = c.id AND reaction = $3 AND users."isBanned" = $2) as "likesCount",
+      (SELECT count(*) FROM public."commentsReactions" INNER JOIN users ON users.id="userId"
+      WHERE "commentId" = c.id AND reaction = $4 AND users."isBanned" = $2) as "dislikesCount"
       FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c.id=$1 AND users."isBanned" = $2
@@ -56,6 +56,7 @@ export class CommentsRepository {
       'Like',
       'Dislike',
     ]);
+    console.log(res);
     if (res.length === 0) return null;
     return res[0];
   }
@@ -104,10 +105,10 @@ export class CommentsRepository {
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
       users.login "commentatorLogin", c."createdAt", 
-    (SELECT count(*) FROM public."commentsReactions"
-    WHERE "commentId" = c.id AND reaction = $4) as "likesCount",
-    (SELECT count(*) FROM public."commentsReactions"
-    WHERE "commentId" = c.id AND reaction = $5) as "dislikesCount"
+    (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "commentId" = c.id AND reaction = $4 AND users."isBanned" = $6) as "likesCount",
+    (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "commentId" = c.id AND reaction = $5 AND users."isBanned" = $6) as "dislikesCount"
       FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c."postId"=$1
@@ -120,6 +121,7 @@ export class CommentsRepository {
       skip,
       'Like',
       'Dislike',
+      false,
     ]);
     return comments;
   }
