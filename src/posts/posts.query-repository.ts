@@ -107,7 +107,7 @@ export class PostsQueryRepository {
   }
 
   async findNewestLikes(postIds: string[]) {
-    console.log(postIds);
+    // console.log(postIds);
     const query = `
     SELECT * FROM (
       SELECT ROW_NUMBER() OVER (PARTITION BY "postId" ORDER BY pr."createdAt" DESC) AS r,
@@ -128,7 +128,7 @@ export class PostsQueryRepository {
     //   ORDER BY "createdAt" DESC
     // `;
     const reactions = await this.dataSource.query(query, [postIds, 'Like']);
-    console.log('reactions', reactions);
+    // console.log('reactions', reactions);
     return reactions.map((r: any) => {
       return {
         addedAt: r.createdAt,

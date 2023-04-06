@@ -84,19 +84,19 @@ export class PostsRepository {
     if (res.length === 0) return 'None';
     return res[0].reaction;
   }
-
-  async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
-    const query = `
-      UPDATE public.blogposts
-	    SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
-	    WHERE id=$3;
-    `;
-    await this.dataSource.query(query, [
-      reactionUpdate.likesCount,
-      reactionUpdate.dislikesCount,
-      commentId,
-    ]);
-  }
+  // method no more needed, count likes and dislikes from reactions table
+  // async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
+  //   const query = `
+  //     UPDATE public.blogposts
+  //     SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
+  //     WHERE id=$3;
+  //   `;
+  //   await this.dataSource.query(query, [
+  //     reactionUpdate.likesCount,
+  //     reactionUpdate.dislikesCount,
+  //     commentId,
+  //   ]);
+  // }
 
   async updatePostReactions(
     postId: string,

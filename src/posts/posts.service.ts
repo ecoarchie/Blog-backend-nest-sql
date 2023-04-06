@@ -57,6 +57,7 @@ export class PostsService {
         postIds,
       );
     }
+    console.log(usersReactions);
     return {
       pagesCount,
       page: paginator.pageNumber,
@@ -108,6 +109,7 @@ export class PostsService {
         postIds,
       );
     }
+    console.log('react', usersReactions);
     return {
       pagesCount,
       page: paginator.pageNumber,
@@ -175,40 +177,39 @@ export class PostsService {
       );
     if (currentReaction === likeStatus) return;
 
-    let reactionUpdate: ReactionUpdate;
-    if (likeStatus === 'None') {
-      if (currentReaction === 'Like') {
-        reactionUpdate = {
-          likesCount: -1,
-          dislikesCount: 0,
-        };
-      } else {
-        // currentReaction = 'Dislike'
-        reactionUpdate = {
-          likesCount: 0,
-          dislikesCount: -1,
-        };
-      }
-    } else {
-      if (currentReaction === 'None') {
-        reactionUpdate = {
-          likesCount: likeStatus === 'Like' ? 1 : 0,
-          dislikesCount: likeStatus === 'Like' ? 0 : 1,
-        };
-      } else if (currentReaction === 'Like') {
-        reactionUpdate = {
-          likesCount: likeStatus === 'Like' ? 0 : -1,
-          dislikesCount: likeStatus === 'Like' ? 0 : 1,
-        };
-      } else {
-        // currentReaction = 'Dislike'
-        reactionUpdate = {
-          likesCount: likeStatus === 'Like' ? 1 : 0,
-          dislikesCount: likeStatus === 'Like' ? -1 : 0,
-        };
-      }
-    }
-    await this.postsRepository.updateReactionCount(postId, reactionUpdate);
+    // let reactionUpdate: ReactionUpdate;
+    // if (likeStatus === 'None') {
+    //   if (currentReaction === 'Like') {
+    //     reactionUpdate = {
+    //       likesCount: -1,
+    //       dislikesCount: 0,
+    //     };
+    //   } else {
+    //     // currentReaction = 'Dislike'
+    //     reactionUpdate = {
+    //       likesCount: 0,
+    //       dislikesCount: -1,
+    //     };
+    //   }
+    // } else {
+    //   if (currentReaction === 'None') {
+    //     reactionUpdate = {
+    //       likesCount: likeStatus === 'Like' ? 1 : 0,
+    //       dislikesCount: likeStatus === 'Like' ? 0 : 1,
+    //     };
+    //   } else if (currentReaction === 'Like') {
+    //     reactionUpdate = {
+    //       likesCount: likeStatus === 'Like' ? 0 : -1,
+    //       dislikesCount: likeStatus === 'Like' ? 0 : 1,
+    //     };
+    //   } else {
+    //     // currentReaction = 'Dislike'
+    //     reactionUpdate = {
+    //       likesCount: likeStatus === 'Like' ? 1 : 0,
+    //       dislikesCount: likeStatus === 'Like' ? -1 : 0,
+    //     };
+    //   }
+    // }
     await this.postsRepository.updatePostReactions(
       postId,
       currentUserId,
