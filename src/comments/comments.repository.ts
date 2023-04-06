@@ -43,14 +43,19 @@ export class CommentsRepository {
       SELECT c.id, c."postId", c.content, c."commentatorId",
       users.login "commentatorLogin", c."createdAt", 
       (SELECT count(*) FROM public."commentsReactions"
-      WHERE "commentId" = c.id AND reaction = $4) as "likesCount",
+      WHERE "commentId" = c.id AND reaction = $3) as "likesCount",
       (SELECT count(*) FROM public."commentsReactions"
-      WHERE "commentId" = c.id AND reaction = $5) as "dislikesCount"
+      WHERE "commentId" = c.id AND reaction = $4) as "dislikesCount"
       FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c.id=$1 AND users."isBanned" = $2
     `;
-    const res = await this.dataSource.query(query, [commentId, false]);
+    const res = await this.dataSource.query(query, [
+      commentId,
+      false,
+      'Like',
+      'Dislike',
+    ]);
     if (res.length === 0) return null;
     return res[0];
   }
