@@ -145,15 +145,15 @@ export class PostsQueryRepository {
   async findPostById(postId: string): Promise<PostDbModel | undefined> {
     const query = `
     SELECT bp.id, title, bp."shortDescription", bp.content, bp."createdAt", "blogId", blogs."name" "blogName", 
-    (SELECT count(*) FROM public."postsReactions"
-    WHERE "postId" = bp.id AND reaction = $2) as "likesCount",
-    (SELECT count(*) FROM public."postsReactions"
-    WHERE "postId" = bp.id AND reaction = $3) as "dislikesCount"
+    (SELECT count(*) FROM public."postsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "postId" = bp.id AND reaction = $2 AND users."isBanned" = $4) as "likesCount",
+    (SELECT count(*) FROM public."postsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "postId" = bp.id AND reaction = $3 AND users."isBanned" = $4) as "dislikesCount"
     FROM public.blogposts bp 
     LEFT JOIN blogs ON blogs.id = bp."blogId"
     WHERE bp.id = $1 
     `;
-    const values = [postId, 'Like', 'Dislike'];
+    const values = [postId, 'Like', 'Dislike', false];
     const post = await this.dataSource.query(query, values);
     return post[0];
   }
