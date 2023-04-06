@@ -41,8 +41,12 @@ export class CommentsRepository {
   ): Promise<CommentViewModel | null> {
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
-      users.login "commentatorLogin", c."createdAt", c."likesCount",
-      c."dislikesCount" FROM public.comments c
+      users.login "commentatorLogin", c."createdAt", 
+      (SELECT count(*) FROM public."commentsReactions"
+      WHERE "commentId" = c.id AND reaction = $4) as "likesCount",
+      (SELECT count(*) FROM public."commentsReactions"
+      WHERE "commentId" = c.id AND reaction = $5) as "dislikesCount"
+      FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c.id=$1 AND users."isBanned" = $2
     `;
@@ -95,8 +99,12 @@ export class CommentsRepository {
     const skip = (paginator.pageNumber - 1) * paginator.pageSize;
     const query = `
       SELECT c.id, c."postId", c.content, c."commentatorId",
-      users.login "commentatorLogin", c."createdAt", c."likesCount",
-      c."dislikesCount" FROM public.comments c
+      users.login "commentatorLogin", c."createdAt", 
+    (SELECT count(*) FROM public."commentsReactions"
+    WHERE "commentId" = c.id AND reaction = $4) as "likesCount",
+    (SELECT count(*) FROM public."commentsReactions"
+    WHERE "commentId" = c.id AND reaction = $5) as "dislikesCount"
+      FROM public.comments c
       LEFT JOIN users ON users.id="commentatorId"
       WHERE c."postId"=$1
       ORDER BY "${sortBy}" ${sortDirection}
@@ -106,6 +114,8 @@ export class CommentsRepository {
       postId,
       pageSize,
       skip,
+      'Like',
+      'Dislike',
     ]);
     return comments;
   }
@@ -143,18 +153,18 @@ export class CommentsRepository {
     await this.dataSource.query(query, [content, commentId]);
   }
 
-  async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
-    const query = `
-      UPDATE public.comments
-	    SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
-	    WHERE id=$3;
-    `;
-    await this.dataSource.query(query, [
-      reactionUpdate.likesCount,
-      reactionUpdate.dislikesCount,
-      commentId,
-    ]);
-  }
+  // async updateReactionCount(commentId: string, reactionUpdate: ReactionUpdate) {
+  //   const query = `
+  //     UPDATE public.comments
+  //     SET "likesCount" = "likesCount" + $1, "dislikesCount" = "dislikesCount" + $2
+  //     WHERE id=$3;
+  //   `;
+  //   await this.dataSource.query(query, [
+  //     reactionUpdate.likesCount,
+  //     reactionUpdate.dislikesCount,
+  //     commentId,
+  //   ]);
+  // }
 
   async updateCommentsReactions(
     commentId: string,

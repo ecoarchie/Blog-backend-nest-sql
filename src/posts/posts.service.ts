@@ -109,7 +109,8 @@ export class PostsService {
         postIds,
       );
     }
-    console.log('react', usersReactions);
+    // console.log('react', usersReactions);
+    // console.log('posts', posts);
     return {
       pagesCount,
       page: paginator.pageNumber,
@@ -137,7 +138,7 @@ export class PostsService {
           likesCount: Number(post.likesCount),
           dislikesCount: Number(post.dislikesCount),
           myStatus:
-            usersReactions?.find((r: any) => (r.postId = post.id))?.reaction ||
+            usersReactions?.find((r: any) => r.postId === post.id)?.reaction ||
             'None',
           newestLikes:
             newestLikes
