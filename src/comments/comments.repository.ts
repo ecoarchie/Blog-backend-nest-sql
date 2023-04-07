@@ -133,7 +133,7 @@ export class CommentsRepository {
     const skip = (paginator.pageNumber - 1) * paginator.pageSize;
     const query = `
     SELECT c.id, c."postId", c.content, c."commentatorId", u.login "commentatorLogin",
-    c."createdAt", p.title, p."blogId" , b.name "blogName"
+    c."createdAt", p.title, p."blogId" , b.name "blogName",
     (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
     WHERE "commentId" = c.id AND reaction = $4 AND users."isBanned" = $6) as "likesCount",
     (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
