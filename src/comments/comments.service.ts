@@ -9,7 +9,11 @@ import { CommentsQueryRepository } from './comments.query-repository';
 import { CommentsRepository } from './comments.repository';
 import { CommentsPaginator } from './dtos/comment-paginator.dto';
 import { ReactionUpdate } from './dtos/reactionUpdate.model';
-import { Comment, CommentViewModel } from './entities/comment.entity';
+import {
+  Comment,
+  CommentViewModel,
+  CommentViewModelWithPostInfo,
+} from './entities/comment.entity';
 
 @Injectable()
 export class CommentsService {
@@ -81,6 +85,30 @@ export class CommentsService {
     };
   }
 
+  async findAllCommentsForNotBannedBlogs(
+    currentUserId: string,
+    commentsPaginator: CommentsPaginator,
+  ) {
+    const comments =
+      await this.commentsRepository.findAllCommentsForNotBannedBlogs(
+        commentsPaginator,
+      );
+    const commentsWithReactions =
+      await this.commentsRepository.checkUserReactionForManyComments(
+        comments,
+        currentUserId,
+      );
+    const totalCount =
+      await this.commentsRepository.getCommentsQtyForNotBannedBlogs();
+    const pagesCount = Math.ceil(totalCount / commentsPaginator.pageSize);
+    return {
+      pagesCount,
+      page: commentsPaginator.pageNumber,
+      pageSize: commentsPaginator.pageSize,
+      totalCount,
+      items: commentsWithReactions.map(this.toViewModelWithPostInfo),
+    };
+  }
   async deleteCommentById(commentId: string, currentUserId: string) {
     const comment =
       await this.commentsRepository.findCommentWithCommentatorInfoById(
@@ -177,6 +205,29 @@ export class CommentsService {
         userLogin: comment.commentatorLogin,
       },
       createdAt: comment.createdAt,
+      likesInfo: {
+        likesCount: Number(comment.likesCount),
+        dislikesCount: Number(comment.dislikesCount),
+        myStatus: comment.myStatus,
+      },
+    };
+  }
+
+  private toViewModelWithPostInfo(comment: CommentViewModelWithPostInfo) {
+    return {
+      id: comment.id,
+      content: comment.content,
+      commentatorInfo: {
+        userId: comment.commentatorId,
+        userLogin: comment.commentatorLogin,
+      },
+      createdAt: comment.createdAt,
+      postInfo: {
+        id: comment.postId,
+        title: comment.title,
+        blogId: comment.blogId,
+        blogName: comment.blogName,
+      },
       likesInfo: {
         likesCount: Number(comment.likesCount),
         dislikesCount: Number(comment.dislikesCount),

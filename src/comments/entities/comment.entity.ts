@@ -37,4 +37,11 @@ export interface CommentViewModel extends Comment {
   likesCount: number;
   dislikesCount: number;
 }
+
+export interface CommentViewModelWithPostInfo extends CommentViewModel {
+  postId: string;
+  title: string;
+  blogId: string;
+  blogName: string;
+}
 // comment

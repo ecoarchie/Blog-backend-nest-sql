@@ -126,6 +126,43 @@ export class CommentsRepository {
     return comments;
   }
 
+  async findAllCommentsForNotBannedBlogs(paginator: CommentsPaginator) {
+    const sortBy = paginator.sortBy;
+    const sortDirection = paginator.sortDirection;
+    const pageSize = paginator.pageSize;
+    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
+    const query = `
+    SELECT c.id, c."postId", c.content, c."commentatorId", u.login "commentatorLogin",
+    c."createdAt", p.title, p."blogId" , b.name "blogName"
+    (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "commentId" = c.id AND reaction = $4 AND users."isBanned" = $6) as "likesCount",
+    (SELECT count(*) FROM public."commentsReactions" LEFT JOIN users ON users.id="userId"
+    WHERE "commentId" = c.id AND reaction = $5 AND users."isBanned" = $6) as "dislikesCount"
+    FROM public.comments c
+    LEFT JOIN blogposts p ON c."postId" = p.id
+    LEFT JOIN users u ON c."commentatorId" = u.id
+    LEFT JOIN blogs b ON p."blogId" = b.id
+    WHERE b."isBanned" = $1
+    ORDER BY "${sortBy}" ${sortDirection}
+    LIMIT $2 OFFSET $3 
+    `;
+    const values = [false, pageSize, skip, 'Like', 'Dislike', false];
+    const comments = await this.dataSource.query(query, values);
+    return comments;
+  }
+
+  async getCommentsQtyForNotBannedBlogs() {
+    const totalCountQuery = `
+    SELECT COUNT(c.id) FROM public.comments c
+    LEFT JOIN blogposts p ON c."postId" = p.id
+    LEFT JOIN users u ON c."commentatorId" = u.id
+    LEFT JOIN blogs b ON p."blogId" = b.id
+    WHERE b."isBanned" = $1
+    `;
+    const result = await this.dataSource.query(totalCountQuery, [false]);
+    return Number(result[0].count);
+  }
+
   async getCommentsQtyForPost(postId: string) {
     const query = `
       SELECT COUNT(*) FROM comments
