@@ -10,7 +10,7 @@ export class Session {
   ip: string;
 
   @Column()
-  browserTitle: string;
+  title: string;
 
   @Column()
   lastActiveDate: Date;
