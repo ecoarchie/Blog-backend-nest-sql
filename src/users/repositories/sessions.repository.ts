@@ -37,7 +37,7 @@ export class SessionsRepository {
   }
 
   async updateSession(
-    sessionId: number,
+    sessionId: string,
     ip: string,
     browserTitle: string,
     newActiveDate: number,
@@ -58,7 +58,7 @@ export class SessionsRepository {
     await this.dataSource.query(query, values);
   }
 
-  async deleteSession(id: number) {
+  async deleteSession(id: string) {
     const query = `
       DELETE FROM public.sessions
         WHERE id=$1

@@ -15,9 +15,17 @@ import { BlogsService } from './blogs.service';
 import { SuperUserBlogsPublicController } from './sa-blogs.controller';
 import { AccessTokenValidationMiddleware } from '../middlewares/accessTokenCheck.middleware';
 import { CommentsModule } from '../comments/comments.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Blog } from './entities/blog.entity';
+import { BannedUsersForBlogs } from './entities/banned-users-for-blog.entity';
 
 @Module({
-  imports: [forwardRef(() => UsersModule), PostsModule, CommentsModule],
+  imports: [
+    forwardRef(() => UsersModule),
+    PostsModule,
+    CommentsModule,
+    TypeOrmModule.forFeature([Blog, BannedUsersForBlogs]),
+  ],
   exports: [BlogsRepository, BlogsQueryRepository, BlogsService],
   controllers: [
     BlogsPublicController,

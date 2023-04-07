@@ -19,7 +19,7 @@ import { CommentsModule } from './comments/comments.module';
       port: 5432,
       username: process.env.PGUSER || 'postgres',
       password: process.env.PGPASSWORD || 'sa',
-      database: process.env.PGDATABASE || 'nest-db',
+      database: process.env.PGDATABASE || 'typeorm', //'nest-db',
       ssl: Boolean(process.env.PGSSL) || false,
       autoLoadEntities: true,
       synchronize: true,

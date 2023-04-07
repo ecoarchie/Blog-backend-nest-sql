@@ -124,7 +124,7 @@ export class PostsService {
     posts: PostDbModel[],
     usersReactions: any,
     newestLikes: any,
-  ): PostViewModel[] {
+  ) {
     return posts.map((post: any) => {
       return {
         id: post.id,

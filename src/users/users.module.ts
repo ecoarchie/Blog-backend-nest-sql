@@ -12,6 +12,9 @@ import { UsersRepository } from './repositories/users.repository';
 import { AuthService } from './services/auth.service';
 import { SessionsService } from './services/sessions.service';
 import { UsersService } from './services/users.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Session } from './entities/session.entity';
 
 @Module({
   controllers: [
@@ -30,7 +33,11 @@ import { UsersService } from './services/users.service';
     JwtService,
     AuthService,
   ],
-  imports: [forwardRef(() => BlogsModule)],
+  imports: [
+    forwardRef(() => BlogsModule),
+    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Session]),
+  ],
   exports: [UsersRepository, UsersQueryRepository, AuthService],
 })
 export class UsersModule {}

@@ -8,7 +8,7 @@ import { PostViewModel } from './models/post-view.model';
 @Injectable()
 export class PostsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
-  async findLatestCreatedPostByBlogId(blogId: string): Promise<PostViewModel> {
+  async findLatestCreatedPostByBlogId(blogId: string) {
     const query = `
       SELECT blogposts.id, title, "shortDescription", content, blogposts."createdAt", "blogId", blogs.name "blogName"
 	    FROM public.blogposts

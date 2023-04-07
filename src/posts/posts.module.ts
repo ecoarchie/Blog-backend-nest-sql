@@ -14,6 +14,9 @@ import { PostsController } from './posts.controller';
 import { PostsQueryRepository } from './posts.query-repository';
 import { PostsRepository } from './posts.repository';
 import { PostsService } from './posts.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlogPost } from './entities/blogpost.entity';
+import { PostsReactions } from './entities/blogposts-reactions.entity';
 
 @Module({
   controllers: [PostsController],
@@ -22,6 +25,7 @@ import { PostsService } from './posts.service';
     forwardRef(() => BlogsModule),
     forwardRef(() => UsersModule),
     forwardRef(() => CommentsModule),
+    TypeOrmModule.forFeature([BlogPost, PostsReactions]),
   ],
   exports: [PostsQueryRepository, PostsRepository, PostsService],
 })
