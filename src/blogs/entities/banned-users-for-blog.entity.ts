@@ -20,7 +20,7 @@ export class BannedUsersForBlogs {
 
   @Column()
   blogId: string;
-  @ManyToOne(() => Blog)
+  @ManyToOne(() => Blog, { onDelete: 'CASCADE' })
   blog: Blog;
 
   @Column({ default: false })
