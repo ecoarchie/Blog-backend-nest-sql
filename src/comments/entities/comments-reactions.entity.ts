@@ -13,12 +13,12 @@ import { Comment } from './comment.entity';
 export class CommentsReactions {
   @PrimaryColumn()
   commentId: string;
-  @ManyToOne(() => Comment)
+  @ManyToOne(() => Comment, { onDelete: 'CASCADE' })
   comment: Comment;
 
   @PrimaryColumn()
   userId: string;
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
   @Column({ default: 'None' })

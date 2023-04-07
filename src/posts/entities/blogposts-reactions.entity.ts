@@ -13,12 +13,12 @@ import { Reaction } from '../../reactions/reaction.model';
 export class PostsReactions {
   @PrimaryColumn()
   postId: string;
-  @ManyToOne(() => BlogPost)
+  @ManyToOne(() => BlogPost, { onDelete: 'CASCADE' })
   post: BlogPost;
 
   @PrimaryColumn()
   userId: string;
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
   @Column({ default: 'None' })
