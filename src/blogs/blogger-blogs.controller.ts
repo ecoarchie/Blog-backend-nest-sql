@@ -24,6 +24,7 @@ import { UpdateBlogDto } from './dtos/updateBlogDto';
 import { Blog } from './entities/blog.entity';
 import { CommentsPaginator } from '../comments/dtos/comment-paginator.dto';
 import { CommentsQueryRepository } from '../comments/comments.query-repository';
+import { CommentsService } from '../comments/comments.service';
 
 @UseGuards(BearerAuthGuard)
 @Controller('blogger/blogs')
@@ -33,7 +34,7 @@ export class BlogsBloggerController {
     private readonly blogsService: BlogsService,
     private readonly postsQueryRepository: PostsQueryRepository,
     private readonly postsService: PostsService,
-    private readonly commentsQueryRepository: CommentsQueryRepository,
+    private readonly commentsService: CommentsService,
   ) {}
 
   @Post()
@@ -125,10 +126,11 @@ export class BlogsBloggerController {
     @Query() paginator: CommentsPaginator,
     @CurrentUser('id') currentUserId: string,
   ) {
-    const comments = await this.commentsQueryRepository.findAllCommentsForPosts(
-      currentUserId,
-      paginator,
-    );
+    const comments =
+      await this.commentsService.findAllCommentsForNotBannedBlogs(
+        currentUserId,
+        paginator,
+      );
     return comments;
   }
 }
