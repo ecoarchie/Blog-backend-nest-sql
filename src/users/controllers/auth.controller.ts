@@ -36,7 +36,7 @@ export class AuthController {
   @Post('login')
   async loginUser(
     @Ip() ip: string,
-    @Headers('user-agent') browserTitle: string,
+    @Headers('user-agent') title: string,
     @Res() res: Response,
     @Body() authUserDto: AuthUserDto,
   ) {
@@ -47,7 +47,7 @@ export class AuthController {
     if (!result) return res.sendStatus(401);
     const { accessToken, refreshToken } = result;
 
-    await this.sessionsService.createNewSession(refreshToken, ip, browserTitle);
+    await this.sessionsService.createNewSession(refreshToken, ip, title);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: Boolean(process.env.HTTP_SECURE) || false,
@@ -83,7 +83,10 @@ export class AuthController {
       });
     }
     const newUserId = await this.usersService.createNewUser(createUserDto);
-    await this.usersService.sendEmailConfirmation(newUserId);
+    await this.usersService.sendEmailConfirmation(
+      newUserId,
+      createUserDto.email,
+    );
   }
 
   @HttpCode(204)

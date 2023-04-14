@@ -6,11 +6,7 @@ import { SessionsRepository } from '../repositories/sessions.repository';
 export class SessionsService {
   constructor(private readonly sessionsRepository: SessionsRepository) {}
 
-  async createNewSession(
-    refreshToken: string,
-    ip: string,
-    browserTitle: string,
-  ) {
+  async createNewSession(refreshToken: string, ip: string, title: string) {
     const tokenData: any = jwt.verify(
       refreshToken,
       process.env.SECRET as jwt.Secret,
@@ -20,7 +16,7 @@ export class SessionsService {
     const { deviceId, userId } = tokenData;
     return this.sessionsRepository.createNewSession({
       ip,
-      browserTitle,
+      title,
       deviceId,
       lastActiveDate: new Date(tokenIssuedDate * 1000),
       tokenExpireDate: new Date(tokenExpireDate * 1000),

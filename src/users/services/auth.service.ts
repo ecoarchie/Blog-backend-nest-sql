@@ -44,7 +44,7 @@ export class AuthService {
   async refreshTokens(
     refreshToken: string,
     ip: string,
-    browserTitle: string,
+    title: string,
   ): Promise<{ newAccessToken: string; newRefreshToken: string }> {
     const validSession = await this.sessionsRepository.verifySessionByToken(
       refreshToken,
@@ -58,11 +58,14 @@ export class AuthService {
       validSession.userId,
       validSession.deviceId,
     );
-    const tokenData: any = jwt.verify(newRefreshToken, process.env.SECRET as jwt.Secret);
+    const tokenData: any = jwt.verify(
+      newRefreshToken,
+      process.env.SECRET as jwt.Secret,
+    );
     await this.sessionsRepository.updateSession(
       validSession.id,
       ip,
-      browserTitle,
+      title,
       tokenData.iat,
       tokenData.exp,
     );

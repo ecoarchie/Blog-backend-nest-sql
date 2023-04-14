@@ -1,7 +1,7 @@
 import { Transform, TransformFnParams } from 'class-transformer';
 import { IsIn, IsOptional, IsPositive, IsString } from 'class-validator';
 
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = 'ASC' | 'DESC' | undefined;
 
 type BanStatus = 'all' | 'banned' | 'notBanned';
 
@@ -12,21 +12,21 @@ export class UserPaginator {
 
   @IsString()
   @IsOptional()
-  sortBy: string = 'createdAt';
+  sortBy = 'createdAt';
 
-  @IsIn(['asc', 'desc'])
+  @IsIn(['asc', 'desc', 'ASC', 'DESC'])
   @IsOptional()
-  sortDirection: SortDirection = 'desc';
-
-  @IsPositive()
-  @Transform(({ value }: TransformFnParams) => Number(value))
-  @IsOptional()
-  pageNumber: number = 1;
+  sortDirection: SortDirection = 'DESC';
 
   @IsPositive()
   @Transform(({ value }: TransformFnParams) => Number(value))
   @IsOptional()
-  pageSize: number = 10;
+  pageNumber = 1;
+
+  @IsPositive()
+  @Transform(({ value }: TransformFnParams) => Number(value))
+  @IsOptional()
+  pageSize = 10;
 
   @IsString()
   @IsOptional()

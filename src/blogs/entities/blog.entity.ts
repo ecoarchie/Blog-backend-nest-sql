@@ -29,7 +29,7 @@ export class Blog {
   @Column({ default: false })
   isMembership: boolean;
 
-  @Column({ type: 'uuid', nullable: false })
+  @Column({ type: 'uuid', nullable: true })
   ownerId: string;
   @ManyToOne(() => User, (u) => u.blogs, { onDelete: 'CASCADE' })
   owner: User;

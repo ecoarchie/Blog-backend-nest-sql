@@ -1,6 +1,6 @@
 export class CreateSessionDto {
   ip: string;
-  browserTitle: string;
+  title: string;
   lastActiveDate: Date;
   deviceId: string;
   tokenExpireDate: Date;

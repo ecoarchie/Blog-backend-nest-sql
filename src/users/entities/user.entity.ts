@@ -4,11 +4,14 @@ import {
   Entity,
   Generated,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Session } from './session.entity';
 import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comment.entity';
+import { UserRegisterConfirmation } from './user-register-confirmation.entity';
+import { UserPasswordRecovery } from './user-pass-recovery.entity';
 
 @Entity('users')
 export class User {
@@ -34,21 +37,6 @@ export class User {
   @Column({ nullable: true })
   banReason: string;
 
-  @Column()
-  @Generated('uuid')
-  confirmationCode: string;
-  @Column({ default: () => "now() + '01:00:00'::interval" })
-  confirmationCodeExpirationDate: Date;
-  @Column({ default: false })
-  confirmationCodeIsConfirmed: boolean;
-
-  @Column({ type: 'uuid', nullable: true })
-  passwordRecoveryCode: string;
-  @Column({ nullable: true })
-  passwordRecoveryExpirationDate: Date;
-  @Column({ default: false })
-  passwordRecoveryCodeIsUsed: boolean;
-
   @OneToMany(() => Session, (s) => s.user)
   sessions: Session[];
 
@@ -57,4 +45,10 @@ export class User {
 
   @OneToMany(() => Blog, (b) => b.owner)
   blogs: Blog[];
+
+  @OneToOne(() => UserRegisterConfirmation, (c) => c.user) // specify inverse side as a second parameter
+  confirmation: UserRegisterConfirmation;
+
+  @OneToOne(() => UserPasswordRecovery, (c) => c.user) // specify inverse side as a second parameter
+  passRecovery: UserRegisterConfirmation;
 }

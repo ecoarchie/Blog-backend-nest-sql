@@ -15,23 +15,23 @@ export class EmailService {
     },
   });
 
-  async sendEmailConfirmationMessage(user: Partial<User>) {
+  async sendEmailConfirmationMessage(email: string, code: string) {
     const info = await this.transporter.sendMail({
       from: 'BlogPost <app.cronosport.gmail.com>',
-      to: user.email,
+      to: email,
       subject: 'Email confirmation',
-      html: `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href='https://somesite.com/confirm-email?code=${user.confirmationCode}'>complete registration</a> </p>`,
+      html: `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href='https://somesite.com/confirm-email?code=${code}'>complete registration</a> </p>`,
     });
   }
 
-  async sendPasswordRecoveryMessage(user: Partial<User>) {
+  async sendPasswordRecoveryMessage(email: string, code: string) {
     const info = await this.transporter.sendMail({
       from: 'BlogPost <app.cronosport.gmail.com>',
-      to: user.email,
+      to: email,
       subject: 'Password Recovery',
       html: `<h1>Password recovery</h1>
        <p>To finish password recovery please follow the link below:
-          <a href='https://somesite.com/password-recovery?recoveryCode=${user.passwordRecoveryCode}'>recovery password</a>
+          <a href='https://somesite.com/password-recovery?recoveryCode=${code}'>recovery password</a>
       </p>`,
     });
   }

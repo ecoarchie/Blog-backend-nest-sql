@@ -29,4 +29,28 @@ export class AppController {
     await this.usersRepository.deleteAllUsers();
     await this.usersRepository.deleteAllSessions();
   }
+
+  @HttpCode(204)
+  @Delete('testing/all-blogs')
+  async deleteAllBlogs() {
+    await this.blogsRepository.deleteAllBlogs();
+  }
+
+  @HttpCode(204)
+  @Delete('testing/all-posts')
+  async deleteAllPosts() {
+    await this.postsRepository.deleteAllPosts();
+  }
+
+  @HttpCode(204)
+  @Delete('testing/all-comments')
+  async deleteAllComments() {
+    await this.commentsRepository.deleteAllComments();
+  }
+
+  @HttpCode(204)
+  @Delete('testing/all-users')
+  async deleteAllUsers() {
+    await this.usersRepository.deleteAllUsers();
+  }
 }

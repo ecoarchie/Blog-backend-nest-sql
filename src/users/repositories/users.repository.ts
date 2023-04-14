@@ -1,17 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
+import { add } from 'date-fns';
 import { User } from '../entities/user.entity';
 import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { SessionsRepository } from './sessions.repository';
 import { BanUserDto } from '../dtos/ban-user.dto';
+import { UserRegisterConfirmation } from '../entities/user-register-confirmation.entity';
+import { UserPasswordRecovery } from '../entities/user-pass-recovery.entity';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
     private readonly sessionsRepository: SessionsRepository,
+    @InjectRepository(UserRegisterConfirmation)
+    private readonly regConfirmationRepo: Repository<UserRegisterConfirmation>,
+    @InjectRepository(UserPasswordRecovery)
+    private readonly passRecoveryRepo: Repository<UserPasswordRecovery>,
+    @InjectRepository(User) private readonly usersTRepo: Repository<User>,
   ) {}
 
   async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
@@ -25,6 +34,22 @@ export class UsersRepository {
     const res: User[] = await this.dataSource.query(query, values);
     const user = res[0];
     return res[0];
+  }
+
+  async updatePassword(userId: string, passwordHash: string) {
+    await this.usersTRepo.update({ id: userId }, { passwordHash });
+  }
+
+  async createConfirmationRecord(userId: string) {
+    const data = await this.regConfirmationRepo.create({ userId });
+    await this.regConfirmationRepo.save(data);
+  }
+
+  async setCodeIsUsedToTrue(info: UserPasswordRecovery) {
+    await this.passRecoveryRepo.update(
+      { userId: info.userId },
+      { codeIsUsed: true },
+    );
   }
 
   async createUser(dto: CreateUserInputDto): Promise<User['id']> {
@@ -64,26 +89,6 @@ export class UsersRepository {
     return user[0].id;
   }
 
-  async findUserById(newUserId: string): Promise<User> {
-    const query = `
-    SELECT * FROM public.users
-    WHERE id = $1 
-    `;
-    const values = [newUserId];
-    const user = await this.dataSource.query(query, values);
-    return user[0];
-  }
-
-  async findUserByEmail(email: string): Promise<User> {
-    const query = `
-    SELECT * FROM public.users
-    WHERE email = $1 
-    `;
-    const values = [email];
-    const user = await this.dataSource.query(query, values);
-    return user[0];
-  }
-
   async updateUserBanInfo(
     userId: string,
     banUserDto: BanUserDto,
@@ -113,90 +118,101 @@ export class UsersRepository {
     ]);
   }
 
-  async setNewPasswordRecoveryCode(user: User) {
-    const query = `
-      UPDATE public.users
-        SET "passwordRecoveryCode"=$1, "passwordRecoveryExpirationDate"=$2, "passwordRecoveryCodeIsUsed"=$3
-        WHERE id=$4
-    `;
-    const values = [
-      user.passwordRecoveryCode,
-      user.passwordRecoveryExpirationDate,
-      user.passwordRecoveryCodeIsUsed,
-      user.id,
-    ];
-    await this.dataSource.query(query, values);
+  async setNewPasswordRecoveryCode(userId: string) {
+    const passwordRecoveryCode = uuidv4();
+    const passwordRecoveryExpirationDate = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    });
+    const passwordRecoveryCodeIsUsed = false;
+    await this.passRecoveryRepo.upsert(
+      {
+        userId,
+        recoveryCode: passwordRecoveryCode,
+        codeExpDate: passwordRecoveryExpirationDate,
+        codeIsUsed: passwordRecoveryCodeIsUsed,
+      },
+      ['userId'],
+    );
+    return passwordRecoveryCode;
+    // const query = `
+    //   UPDATE public.users
+    //     SET "passwordRecoveryCode"=$1, "passwordRecoveryExpirationDate"=$2, "passwordRecoveryCodeIsUsed"=$3
+    //     WHERE id=$4
+    // `;
+    // const values = [
+    //   user.passwordRecoveryCode,
+    //   user.passwordRecoveryExpirationDate,
+    //   user.passwordRecoveryCodeIsUsed,
+    //   user.id,
+    // ];
+    // await this.dataSource.query(query, values);
   }
 
   async updateEmailConfirmationCode(
-    code: string,
-    userId: string,
+    newInfo: UserRegisterConfirmation,
   ): Promise<void> {
-    const updateQuery = `
-      UPDATE public.users
-	      SET "confirmationCode"=$1
-	      WHERE id = $2;
-    `;
-    await this.dataSource.query(updateQuery, [code, userId]);
+    // const updateQuery = `
+    //   UPDATE public.users
+    //     SET "confirmationCode"=$1
+    //     WHERE id = $2;
+    // `;
+    // await this.dataSource.query(updateQuery, [code, userId]);
+    await this.regConfirmationRepo.save(newInfo);
   }
 
-  async findUserByConfirmCode(code: string): Promise<User> {
-    const query = `
-    SELECT * FROM public.users
-    WHERE "confirmationCode" = $1 
-    `;
-    const values = [code];
-    const user = await this.dataSource.query(query, values);
-    return user.length !== 0 ? user[0] : null;
-  }
   //
-  async findUserByRecoveryCode(code: string): Promise<User> {
-    const query = `
-    SELECT * FROM public.users
-    WHERE "passwordRecoveryCode" = $1 
-    `;
-    const values = [code];
-    const user = await this.dataSource.query(query, values);
-    return user.length !== 0 ? user[0] : null;
-  }
+  // async findUserByRecoveryCode(code: string): Promise<User> {
+  //   const query = `
+  //   SELECT * FROM public.users
+  //   WHERE "passwordRecoveryCode" = $1
+  //   `;
+  //   const values = [code];
+  //   const user = await this.dataSource.query(query, values);
+  //   return user.length !== 0 ? user[0] : null;
+  // }
 
   async setEmailIsConfirmedToTrue(userId: string): Promise<void> {
-    const updateQuery = `
-      UPDATE public.users
-	      SET "confirmationCodeIsConfirmed"=TRUE
-	      WHERE id = $1;
-    `;
-    await this.dataSource.query(updateQuery, [userId]);
+    // const updateQuery = `
+    //   UPDATE public.users
+    //     SET "confirmationCodeIsConfirmed"=TRUE
+    //     WHERE id = $1;
+    // `;
+    // await this.dataSource.query(updateQuery, [userId]);
+    await this.regConfirmationRepo.update(
+      { userId },
+      { codeIsConfirmed: true },
+    );
   }
 
-  async saveUser(user: User): Promise<void> {
-    const query = `
-      UPDATE public.users
-	      SET login=$1, email=$2, "passwordHash"=$3, "createdAt"=$4, "isBanned"=$5, "banDate"=$6, 
-          "banReason"=$7, "confirmationCode"=$8, "confirmationCodeExpirationDate"=$9,
-          "confirmationCodeIsConfirmed"=$10, "passwordRecoveryCode"=$11, "passwordRecoveryExpirationDate"=$12,
-          "passwordRecoveryCodeIsUsed"=$13
-        WHERE id=$14;
-    `;
-    const values = [
-      user.login,
-      user.email,
-      user.passwordHash,
-      user.createdAt,
-      user.isBanned,
-      user.banDate,
-      user.banReason,
-      user.confirmationCode,
-      user.confirmationCodeExpirationDate,
-      user.confirmationCodeIsConfirmed,
-      user.passwordRecoveryCode,
-      user.passwordRecoveryExpirationDate,
-      user.passwordRecoveryCodeIsUsed,
-      user.id,
-    ];
+  // async saveUser(user: User): Promise<void> {
+  //   const query = `
+  //     UPDATE public.users
+  //       SET login=$1, email=$2, "passwordHash"=$3, "createdAt"=$4, "isBanned"=$5, "banDate"=$6,
+  //         "banReason"=$7, "confirmationCode"=$8, "confirmationCodeExpirationDate"=$9,
+  //         "confirmationCodeIsConfirmed"=$10, "passwordRecoveryCode"=$11, "passwordRecoveryExpirationDate"=$12,
+  //         "passwordRecoveryCodeIsUsed"=$13
+  //       WHERE id=$14;
+  //   `;
+  //   const values = [
+  //     user.login,
+  //     user.email,
+  //     user.passwordHash,
+  //     user.createdAt,
+  //     user.isBanned,
+  //     user.banDate,
+  //     user.banReason,
+  //     user.confirmationCode,
+  //     user.confirmationCodeExpirationDate,
+  //     user.confirmationCodeIsConfirmed,
+  //     user.passwordRecoveryCode,
+  //     user.passwordRecoveryExpirationDate,
+  //     user.passwordRecoveryCodeIsUsed,
+  //     user.id,
+  //   ];
 
-    await this.dataSource.query(query, values);
-  }
+  //   await this.dataSource.query(query, values);
+  // }
 
   async findBannedUserForBlog(blogId: string, userId: string) {
     const query = `

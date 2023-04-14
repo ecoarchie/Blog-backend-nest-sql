@@ -15,6 +15,7 @@ import { BannedUsersPaginator } from '../users/dtos/banned-users-paginator';
 import { BanUserByBloggerDto } from '../users/dtos/ban-user-by-blogger.dto';
 import { BanBlogDto } from './dtos/banBlog.dto';
 import { UsersRepository } from '../users/repositories/users.repository';
+import { UsersQueryRepository } from '../users/repositories/users.query-repository';
 
 @Injectable()
 export class BlogsService {
@@ -22,6 +23,7 @@ export class BlogsService {
     private readonly blogsRepository: BlogsRepository,
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly usersQueryRepository: UsersQueryRepository,
     protected dataSource: DataSource,
   ) {}
   async createNewBlog(
@@ -98,7 +100,7 @@ export class BlogsService {
 
     if (blog.ownerId !== bloggerId) throw new ForbiddenException();
 
-    const user = await this.usersRepository.findUserById(userId);
+    const user = await this.usersQueryRepository.findUserById(userId);
     if (!user) throw new NotFoundException();
 
     await this.blogsRepository.updateBanStatusOfUserInBlog(
@@ -125,7 +127,7 @@ export class BlogsService {
         field: 'blodId',
       });
 
-    const user = await this.usersRepository.findUserById(userId);
+    const user = await this.usersQueryRepository.findUserById(userId);
     if (!user) {
       throw new BadRequestException({
         message: 'User with passed Id does not exist',

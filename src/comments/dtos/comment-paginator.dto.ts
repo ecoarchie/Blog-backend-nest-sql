@@ -10,7 +10,7 @@ export class CommentsPaginator {
 
   @IsIn(['asc', 'desc'])
   @IsOptional()
-  sortDirection: SortDirection = 'desc';
+  sortDirection: SortDirection = 'DESC';
 
   @IsPositive()
   @Transform(({ value }: TransformFnParams) => Number(value))

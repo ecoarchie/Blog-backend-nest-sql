@@ -5,8 +5,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { User } from '../entities/user.entity';
@@ -15,56 +15,72 @@ import { Session } from '../entities/session.entity';
 
 @Injectable()
 export class SessionsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(Session)
+    private readonly sessionTRepository: Repository<Session>,
+  ) {}
 
   async createNewSession(createSessionDto: CreateSessionDto): Promise<void> {
-    const sessionInsertQuery = `
-    INSERT INTO public.sessions(
-	 ip, "title", "lastActiveDate", "deviceId", "tokenExpireDate", "userId")
-	VALUES ($1, $2, $3, $4, $5, $6)
-    `;
+    const session = await this.sessionTRepository.create(createSessionDto);
+    await this.sessionTRepository.save(session);
+    //   const sessionInsertQuery = `
+    //   INSERT INTO public.sessions(
+    //  ip, "title", "lastActiveDate", "deviceId", "tokenExpireDate", "userId")
+    // VALUES ($1, $2, $3, $4, $5, $6)
+    //   `;
 
-    const values = [
-      createSessionDto.ip,
-      createSessionDto.browserTitle,
-      createSessionDto.lastActiveDate,
-      createSessionDto.deviceId,
-      createSessionDto.tokenExpireDate,
-      createSessionDto.userId,
-    ];
-    await this.dataSource.query(sessionInsertQuery, values);
+    //   const values = [
+    //     createSessionDto.ip,
+    //     createSessionDto.browserTitle,
+    //     createSessionDto.lastActiveDate,
+    //     createSessionDto.deviceId,
+    //     createSessionDto.tokenExpireDate,
+    //     createSessionDto.userId,
+    //   ];
+    //   await this.dataSource.query(sessionInsertQuery, values);
     return;
   }
 
   async updateSession(
     sessionId: string,
     ip: string,
-    browserTitle: string,
+    title: string,
     newActiveDate: number,
     newTokenExpDate: number,
   ): Promise<void> {
-    const query = `
-     UPDATE public.sessions
-      SET "ip"=$1, "title"=$2, "lastActiveDate"=$3, "tokenExpireDate"=$4
-      WHERE id=$5
-    `;
-    const values = [
-      ip,
-      browserTitle,
-      new Date(newActiveDate * 1000),
-      new Date(newTokenExpDate * 1000),
-      sessionId,
-    ];
-    await this.dataSource.query(query, values);
+    await this.sessionTRepository.update(
+      { id: sessionId },
+      {
+        ip,
+        title,
+        lastActiveDate: new Date(newActiveDate * 1000),
+        tokenExpireDate: new Date(newTokenExpDate * 1000),
+      },
+    );
+    // const query = `
+    //  UPDATE public.sessions
+    //   SET "ip"=$1, "title"=$2, "lastActiveDate"=$3, "tokenExpireDate"=$4
+    //   WHERE id=$5
+    // `;
+    // const values = [
+    //   ip,
+    //   title,
+    //   new Date(newActiveDate * 1000),
+    //   new Date(newTokenExpDate * 1000),
+    //   sessionId,
+    // ];
+    // await this.dataSource.query(query, values);
   }
 
   async deleteSession(id: string) {
-    const query = `
-      DELETE FROM public.sessions
-        WHERE id=$1
-    `;
+    // const query = `
+    //   DELETE FROM public.sessions
+    //     WHERE id=$1
+    // `;
 
-    await this.dataSource.query(query, [id]);
+    // await this.dataSource.query(query, [id]);
+    await this.sessionTRepository.delete({ id });
   }
 
   async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
@@ -90,11 +106,12 @@ export class SessionsRepository {
   }
 
   async deleteAllUserSessions(userId: string): Promise<void> {
-    const deleteQuery = `
-      DELETE FROM public.sessions
-      WHERE "userId" = $1;
-    `;
-    await this.dataSource.query(deleteQuery, [userId]);
+    // const deleteQuery = `
+    //   DELETE FROM public.sessions
+    //   WHERE "userId" = $1;
+    // `;
+    // await this.dataSource.query(deleteQuery, [userId]);
+    await this.sessionTRepository.delete({ userId });
   }
 
   async verifySessionByToken(token: string): Promise<Session | null> {
@@ -109,15 +126,23 @@ export class SessionsRepository {
       const lastActiveDate = new Date(tokenData.iat * 1000);
       const deviceId = tokenData.deviceId;
       const userId = tokenData.userId;
-      const query = `
-        SELECT * FROM public.sessions
-        WHERE "lastActiveDate"=$1 AND
-        "deviceId"=$2 AND
-        "userId"=$3
-      `;
-      const values = [lastActiveDate, deviceId, userId];
-      const result = await this.dataSource.query(query, values);
-      return result[0];
+      // const query = `
+      //   SELECT * FROM public.sessions
+      //   WHERE "lastActiveDate"=$1 AND
+      //   "deviceId"=$2 AND
+      //   "userId"=$3
+      // `;
+      // const values = [lastActiveDate, deviceId, userId];
+      // const result = await this.dataSource.query(query, values);
+      // return result[0];
+      const session = await this.sessionTRepository.findOne({
+        where: {
+          lastActiveDate,
+          deviceId,
+          userId,
+        },
+      });
+      return session;
     } catch (error) {
       console.log(error);
       return null;
@@ -129,12 +154,16 @@ export class SessionsRepository {
     if (!validSession) throw new UnauthorizedException();
 
     const userId = validSession.userId;
-    const query = `
-    SELECT ip, title, "lastActiveDate", "deviceId" FROM public.sessions
-    WHERE "userId"=$1
+    //     const query = `
+    //     SELECT ip, title, "lastActiveDate", "deviceId" FROM public.sessions
+    //     WHERE "userId"=$1
 
-`;
-    const sessionFound = await this.dataSource.query(query, [userId]);
+    // `;
+    const sessionFound = await this.sessionTRepository.find({
+      where: {
+        userId,
+      },
+    });
     if (sessionFound.length === 0) throw new UnauthorizedException();
 
     return sessionFound;
@@ -146,20 +175,28 @@ export class SessionsRepository {
 
     const userId = validSession.userId;
     const deviceId = validSession.deviceId;
-    const deleteQuery = `
-    DELETE FROM public.sessions
-	    WHERE "userId"=$1 AND "deviceId"!=$2;
-    `;
-    await this.dataSource.query(deleteQuery, [userId, deviceId]);
+    // const deleteQuery = `
+    // DELETE FROM public.sessions
+    //   WHERE "userId"=$1 AND "deviceId"!=$2;
+    // `;
+    // await this.dataSource.query(deleteQuery, [userId, deviceId]);
+    await this.sessionTRepository
+      .createQueryBuilder()
+      .delete()
+      .where('"userId" = :userId AND "deviceId" != :deviceId', {
+        userId,
+        deviceId,
+      })
+      .execute();
     return;
   }
 
   async deleteAllBannedUserSessions(userId: string): Promise<void> {
-    const deleteQuery = `
-    DELETE FROM public.sessions
-      WHERE "userId"=$1
-    `;
-    await this.dataSource.query(deleteQuery, [userId]);
+    // const deleteQuery = `
+    // DELETE FROM public.sessions
+    //   WHERE "userId"=$1
+    // `;
+    await this.sessionTRepository.delete({ userId });
   }
 
   async deleteDeviceSessions(
@@ -170,30 +207,32 @@ export class SessionsRepository {
     if (!validSession) throw new UnauthorizedException();
 
     const userId = validSession.userId;
-    const sessionQuery = `
-    SELECT * FROM public.sessions
-      WHERE "deviceId"=$1
-    `;
-    const foundDeviceSession = await this.dataSource.query(sessionQuery, [
+    // const sessionQuery = `
+    // SELECT * FROM public.sessions
+    //   WHERE "deviceId"=$1
+    // `;
+    const foundDeviceSession = await this.sessionTRepository.findBy({
       deviceId,
-    ]);
+    });
     if (foundDeviceSession.length === 0) {
       throw new NotFoundException();
     }
-    if (foundDeviceSession[0].userId !== userId) {
-      throw new ForbiddenException();
-    } else {
-      const deleteQuery = `
-      DELETE FROM public.sessions
-        WHERE "deviceId"=$1
-      `;
-      try {
-        await this.dataSource.query(deleteQuery, [deviceId]);
-      } catch (error) {
-        console.log(error);
-        console.log('cannot delete device session');
-        throw new BadRequestException();
-      }
+    for (const session of foundDeviceSession) {
+      if (session.userId !== userId) throw new ForbiddenException();
+    }
+    // if (foundDeviceSession[0].userId !== userId) {
+    //   throw new ForbiddenException();
+    // } else {
+    //   const deleteQuery = `
+    //   DELETE FROM public.sessions
+    //     WHERE "deviceId"=$1
+    //   `;
+    try {
+      await this.sessionTRepository.delete({ deviceId });
+    } catch (error) {
+      console.log(error);
+      console.log('cannot delete device session');
+      throw new BadRequestException();
     }
   }
 
