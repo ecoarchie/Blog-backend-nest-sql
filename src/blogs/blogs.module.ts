@@ -18,13 +18,14 @@ import { CommentsModule } from '../comments/comments.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blog } from './entities/blog.entity';
 import { BannedUsersForBlogs } from './entities/banned-users-for-blog.entity';
+import { BlogPost } from '../posts/entities/blogpost.entity';
 
 @Module({
   imports: [
     forwardRef(() => UsersModule),
     PostsModule,
     CommentsModule,
-    TypeOrmModule.forFeature([Blog, BannedUsersForBlogs]),
+    TypeOrmModule.forFeature([Blog, BannedUsersForBlogs, BlogPost]),
   ],
   exports: [BlogsRepository, BlogsQueryRepository, BlogsService],
   controllers: [

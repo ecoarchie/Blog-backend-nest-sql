@@ -7,9 +7,9 @@ import { PaginationView } from '../../common_models/pagination-view.model';
 export class BlogsPaginator {
   @IsString()
   @IsOptional()
-  sortBy = 'createdAt';
+  sortBy = 'created_at';
 
-  @IsIn(['asc', 'desc'])
+  @IsIn(['asc', 'desc', 'ASC', 'DESC'])
   @IsOptional()
   sortDirection: SortDirection = 'DESC';
 

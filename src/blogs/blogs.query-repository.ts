@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { BlogsPagination, BlogsPaginator } from './dtos/blog-paginator.dto';
 import { Blog } from './entities/blog.entity';
 import { PublicBlogViewModel } from './models/public-blog-view.model';
@@ -8,22 +8,22 @@ import { SaBlogViewModel } from './models/sa-blog-view.model';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(Blog) private blogsTRepo: Repository<Blog>,
+  ) {}
 
-  async findAllBlogs(
-    blogsPaginatorQuery: BlogsPaginator,
-  ): Promise<BlogsPagination> {
-    const searchNameTerm = blogsPaginatorQuery.searchNameTerm
-      ? '%' + blogsPaginatorQuery.searchNameTerm + '%'
+  async findAllBlogs(paginator: BlogsPaginator): Promise<BlogsPagination> {
+    const searchNameTerm = paginator.searchNameTerm
+      ? '%' + paginator.searchNameTerm + '%'
       : '%';
-    const sortBy = blogsPaginatorQuery.sortBy;
-    const sortDirection = blogsPaginatorQuery.sortDirection;
-    const pageSize = blogsPaginatorQuery.pageSize;
-    const skip =
-      (blogsPaginatorQuery.pageNumber - 1) * blogsPaginatorQuery.pageSize;
+    const sortBy = paginator.sortBy;
+    const sortDirection = paginator.sortDirection;
+    const pageSize = paginator.pageSize;
+    const skip = (paginator.pageNumber - 1) * paginator.pageSize;
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE LOWER(name) LIKE LOWER($1) AND blogs."isBanned"=$4
+    SELECT id, name, "description", "website_url", "created_at", "is_membership" FROM public.blogs
+    WHERE LOWER(name) LIKE LOWER($1) AND blogs."is_banned"=$4
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $2 OFFSET $3 
     `;
@@ -42,11 +42,11 @@ export class BlogsQueryRepository {
     ]);
     const totalCount = Number(result[0].count);
 
-    const pagesCount = Math.ceil(totalCount / blogsPaginatorQuery.pageSize);
+    const pagesCount = Math.ceil(totalCount / paginator.pageSize);
     return {
       pagesCount,
-      page: blogsPaginatorQuery.pageNumber,
-      pageSize: blogsPaginatorQuery.pageSize,
+      page: paginator.pageNumber,
+      pageSize: paginator.pageSize,
       totalCount,
       items: blogs,
     };
@@ -62,9 +62,9 @@ export class BlogsQueryRepository {
     const skip =
       (blogsPaginatorQuery.pageNumber - 1) * blogsPaginatorQuery.pageSize;
     const query = `
-    SELECT blogs.id, name, "description", "websiteUrl", blogs."createdAt", "isMembership", users.id "userId",
-    users.login "userLogin", blogs."isBanned", blogs."banDate" FROM public.blogs
-    LEFT JOIN users ON users.id=blogs."ownerId"
+    SELECT blogs.id, name, "description", "website_url", blogs."created_at", "is_membership", users.id "userId",
+    users.login "userLogin", blogs."is_banned", blogs."ban_date" FROM public.blogs
+    LEFT JOIN users ON users.id=blogs."owner_id"
     WHERE LOWER(name) LIKE LOWER($1) 
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $2 OFFSET $3 
@@ -74,7 +74,7 @@ export class BlogsQueryRepository {
 
     const totalCountQuery = `
     SELECT COUNT(*) FROM public.blogs
-    LEFT JOIN users ON users.id=blogs."ownerId"
+    LEFT JOIN users ON users.id=blogs."owner_id"
     WHERE LOWER(name) LIKE LOWER($1) 
     `;
     const result = await this.dataSource.query(totalCountQuery, [
@@ -113,8 +113,8 @@ export class BlogsQueryRepository {
 
   async findNotBannedBlogById(id: string): Promise<Partial<Blog>> {
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE id=$1 AND "isBanned"=$2 
+    SELECT id, name, "description", "website_url", "created_at", "is_membership" FROM public.blogs
+    WHERE id=$1 AND "is_banned"=$2 
     `;
     const result = await this.dataSource.query(query, [id, false]);
     return result[0];
@@ -122,8 +122,8 @@ export class BlogsQueryRepository {
 
   async findBlogById(newBlogId: string): Promise<Partial<Blog>> {
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE id=$1 and "isBanned"=$2
+    SELECT id, name, "description", "website_url", "created_at", "is_membership" FROM public.blogs
+    WHERE id=$1 and "is_banned"=$2
     `;
     const result = await this.dataSource.query(query, [newBlogId, false]);
     return result[0];
@@ -131,9 +131,9 @@ export class BlogsQueryRepository {
 
   async findLatestCreatedBlog(userId: string): Promise<Partial<Blog>> {
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE "ownerId"=$1
-    ORDER BY "createdAt" DESC
+    SELECT id, name, "description", "website_url", "created_at", "is_membership" FROM public.blogs
+    WHERE "owner_id"=$1
+    ORDER BY "created_at" DESC
     LIMIT 1
     `;
     const result = await this.dataSource.query(query, [userId]);
@@ -153,8 +153,8 @@ export class BlogsQueryRepository {
     const skip =
       (blogsPaginatorQuery.pageNumber - 1) * blogsPaginatorQuery.pageSize;
     const query = `
-    SELECT id, name, "description", "websiteUrl", "createdAt", "isMembership" FROM public.blogs
-    WHERE LOWER(name) LIKE LOWER($1) AND "isBanned" = $2 AND "ownerId"=$5 
+    SELECT id, name, description, website_url, created_at, is_membership FROM public.blogs
+    WHERE LOWER(name) LIKE LOWER($1) AND "is_banned" = $2 AND "owner_id"=$5 
     ORDER BY "${sortBy}" ${sortDirection}
     LIMIT $3 OFFSET $4 
     `;
@@ -163,7 +163,7 @@ export class BlogsQueryRepository {
 
     const totalCountQuery = `
     SELECT COUNT(id) FROM public.blogs
-    WHERE LOWER(name) LIKE LOWER($1) AND "isBanned" = $2 AND "ownerId"=$3 
+    WHERE LOWER(name) LIKE LOWER($1) AND "is_banned" = $2 AND "owner_id"=$3 
     `;
     const result = await this.dataSource.query(totalCountQuery, [
       searchNameTerm,

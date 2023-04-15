@@ -12,6 +12,7 @@ import { Blog } from '../../blogs/entities/blog.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 import { UserRegisterConfirmation } from './user-register-confirmation.entity';
 import { UserPasswordRecovery } from './user-pass-recovery.entity';
+import { BannedUsersForBlogs } from '../../blogs/entities/banned-users-for-blog.entity';
 
 @Entity('users')
 export class User {
@@ -41,7 +42,12 @@ export class User {
   sessions: Session[];
 
   @OneToMany(() => Comment, (c) => c.commentator, { onDelete: 'CASCADE' })
-  comments: Comment;
+  comments: Comment[];
+
+  @OneToMany(() => BannedUsersForBlogs, (b) => b.user, {
+    onDelete: 'CASCADE',
+  })
+  bans: BannedUsersForBlogs[];
 
   @OneToMany(() => Blog, (b) => b.owner)
   blogs: Blog[];

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -17,20 +18,22 @@ export class BlogPost {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ name: 'short_description' })
   shortDescription: string;
 
   @Column()
   content: string;
 
-  @Column()
+  @Column({ name: 'blog_id' })
   blogId: string;
+
   @ManyToOne(() => Blog, (b) => b.posts, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'blog_id' })
   blog: Blog;
 
   @OneToMany(() => Comment, (c) => c.post)
   comments: Comment[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

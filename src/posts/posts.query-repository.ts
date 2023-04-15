@@ -10,15 +10,16 @@ export class PostsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async findLatestCreatedPostByBlogId(blogId: string) {
     const query = `
-      SELECT blogposts.id, title, "shortDescription", content, blogposts."createdAt", "blogId", blogs.name "blogName"
+      SELECT blogposts.id, title, "short_description", content, blogposts."created_at", "blog_id", blogs.name "blogName"
 	    FROM public.blogposts
-      LEFT JOIN blogs ON blogs.id="blogId"
-      WHERE "blogId"=$1
-      ORDER BY blogposts."createdAt" DESC
+      LEFT JOIN blogs ON blogs.id="blog_id"
+      WHERE "blog_id"=$1
+      ORDER BY blogposts."created_at" DESC
       LIMIT 1;
       `;
     const result = await this.dataSource.query(query, [blogId]);
     const post: PostDbModel = result[0];
+    console.log(post);
     return {
       id: post.id,
       title: post.title,

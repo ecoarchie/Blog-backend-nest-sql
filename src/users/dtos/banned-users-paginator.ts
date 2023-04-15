@@ -7,7 +7,7 @@ export class BannedUsersPaginator {
   @IsOptional()
   sortBy = 'createdAt';
 
-  @IsIn(['asc', 'desc'])
+  @IsIn(['asc', 'desc', 'ASC', 'DESC'])
   @IsOptional()
   sortDirection: SortDirection = 'DESC';
 

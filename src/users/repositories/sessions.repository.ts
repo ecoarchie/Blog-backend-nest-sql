@@ -172,6 +172,7 @@ export class SessionsRepository {
       },
     });
     if (sessionFound.length === 0) throw new UnauthorizedException();
+    console.log(sessionFound);
 
     return sessionFound;
   }

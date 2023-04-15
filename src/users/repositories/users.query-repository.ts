@@ -10,7 +10,6 @@ import { UserPasswordRecovery } from '../entities/user-pass-recovery.entity';
 @Injectable()
 export class UsersQueryRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(User) private readonly usersTRepo: Repository<User>,
     @InjectRepository(UserRegisterConfirmation)
     private readonly regConfirmationRepo: Repository<UserRegisterConfirmation>,

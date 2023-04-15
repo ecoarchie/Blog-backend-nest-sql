@@ -8,7 +8,7 @@ export class JwtService {
       { userId: userId },
       process.env.SECRET as jwt.Secret,
       {
-        expiresIn: 10,
+        expiresIn: '10h',
       },
     );
     return token;
@@ -19,7 +19,7 @@ export class JwtService {
       { userId, deviceId },
       process.env.SECRET as jwt.Secret,
       {
-        expiresIn: 20,
+        expiresIn: '20h',
       },
     );
     return token;

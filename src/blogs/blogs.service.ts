@@ -74,6 +74,7 @@ export class BlogsService {
     paginator: BannedUsersPaginator,
   ) {
     const blog = await this.blogsRepository.findBlogWithOwnerById(blogId);
+    console.log(blog);
     if (!blog) throw new NotFoundException();
     if (blog.ownerId !== currentUserId) throw new ForbiddenException();
 

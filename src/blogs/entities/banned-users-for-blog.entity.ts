@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -13,22 +14,26 @@ export class BannedUsersForBlogs {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'user_id' })
   userId: string;
+
   @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column()
+  @Column({ name: 'blog_id' })
   blogId: string;
+
   @ManyToOne(() => Blog, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'blog_id' })
   blog: Blog;
 
-  @Column({ default: false })
+  @Column({ name: 'is_banned', default: false })
   isBanned: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: 'ban_reason', nullable: true })
   banReason: string;
 
-  @Column({ default: () => 'now()' })
+  @Column({ name: 'ban_date', default: () => 'now()' })
   banDate: Date;
 }

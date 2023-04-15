@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -20,26 +21,28 @@ export class Blog {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ name: 'website_url' })
   websiteUrl: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ default: false })
+  @Column({ name: 'is_membership', default: false })
   isMembership: boolean;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ name: 'owner_id', type: 'uuid', nullable: true })
   ownerId: string;
+
   @ManyToOne(() => User, (u) => u.blogs, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'owner_id' })
   owner: User;
 
   @OneToMany(() => BlogPost, (bp) => bp.blog)
   posts: BlogPost[];
 
-  @Column({ default: false })
+  @Column({ name: 'is_banned', default: false })
   isBanned: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: 'ban_date', nullable: true })
   banDate: Date;
 }

@@ -23,7 +23,7 @@ import { SessionsService } from '../services/sessions.service';
 import { BearerAuthGuard } from '../guards/bearer.auth.guard';
 import { AuthService } from '../services/auth.service';
 
-@UseGuards(ThrottlerGuard)
+// @UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -55,7 +55,7 @@ export class AuthController {
     res.status(200).send({ accessToken });
   }
 
-  @SkipThrottle()
+  // @SkipThrottle()
   @UseGuards(BearerAuthGuard)
   @Get('me')
   async getCurrentUserInfo(@Req() req: Request) {
@@ -107,7 +107,7 @@ export class AuthController {
     await this.usersService.resendRegistrationEmail(emailDto.email);
   }
 
-  @SkipThrottle()
+  // @SkipThrottle()
   @Post('refresh-token')
   async refreshTokens(
     @Ip() ip: string,
@@ -131,7 +131,7 @@ export class AuthController {
     res.status(200).send({ accessToken: newAccessToken });
   }
 
-  @SkipThrottle()
+  // @SkipThrottle()
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.refreshToken;

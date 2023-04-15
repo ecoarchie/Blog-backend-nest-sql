@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
 import { User } from '../entities/user.entity';
-import { CreateUserInputDto } from '../dtos/create-user-input.dto';
 import { SessionsRepository } from './sessions.repository';
-import { BanUserDto } from '../dtos/ban-user.dto';
 import { UserRegisterConfirmation } from '../entities/user-register-confirmation.entity';
 import { UserPasswordRecovery } from '../entities/user-pass-recovery.entity';
 
@@ -23,18 +20,18 @@ export class UsersRepository {
     @InjectRepository(User) private readonly usersTRepo: Repository<User>,
   ) {}
 
-  async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
-    const query = `
-    SELECT * FROM public.users
-    WHERE login = $1 OR email = $2
-    `;
+  // async findUserByLoginOrEmail(login: string, email: string): Promise<User> {
+  //   const query = `
+  //   SELECT * FROM public.users
+  //   WHERE login = $1 OR email = $2
+  //   `;
 
-    const values = [login, email];
+  //   const values = [login, email];
 
-    const res: User[] = await this.dataSource.query(query, values);
-    const user = res[0];
-    return res[0];
-  }
+  //   const res: User[] = await this.dataSource.query(query, values);
+  //   const user = res[0];
+  //   return res[0];
+  // }
 
   async updatePassword(userId: string, passwordHash: string) {
     await this.usersTRepo.update({ id: userId }, { passwordHash });

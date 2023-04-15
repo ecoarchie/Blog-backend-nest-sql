@@ -28,7 +28,7 @@ export class UsersService {
   ) {}
 
   async loginUser(loginOrEmail: string, password: string) {
-    const user = await this.usersRepository.findUserByLoginOrEmail(
+    const user = await this.usersQueryRepository.findUserByLoginOrEmail(
       loginOrEmail,
       loginOrEmail,
     );
