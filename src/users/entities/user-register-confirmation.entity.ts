@@ -10,7 +10,7 @@ import { User } from './user.entity';
 
 @Entity('user_register_confirmation')
 export class UserRegisterConfirmation {
-  @OneToOne(() => User, (user) => user.confirmation)
+  @OneToOne(() => User, (user) => user.confirmation, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: string;
 

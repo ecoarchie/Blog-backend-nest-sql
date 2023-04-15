@@ -9,14 +9,6 @@ import { UserPasswordRecovery } from '../entities/user-pass-recovery.entity';
 
 @Injectable()
 export class UsersQueryRepository {
-  // const query = `
-  // SELECT * FROM public.users
-  // WHERE login = $1 OR email = $2
-  // `;
-  // const values = [login, email];
-  // const res: User[] = await this.dataSource.query(query, values);
-  // const user = res[0];
-  // return res[0];
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(User) private readonly usersTRepo: Repository<User>,
@@ -28,13 +20,10 @@ export class UsersQueryRepository {
   async findAll(paginator: UserPaginator): Promise<UsersPagination> {
     const banStatus =
       paginator.banStatus === 'all'
-        ? // ? `${true} OR "isBanned" = ${false}`
-          [true, false]
+        ? [true, false]
         : paginator.banStatus === 'banned'
-        ? // ? true
-          [true]
-        : // : false;
-          [false];
+        ? [true]
+        : [false];
     const searchLoginTerm = paginator.searchLoginTerm
       ? '%' + paginator.searchLoginTerm + '%'
       : '%';

@@ -30,12 +30,12 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: false })
+  @Column({ type: 'boolean', default: false })
   isBanned: boolean;
-  @Column({ nullable: true })
-  banDate: Date;
-  @Column({ nullable: true })
-  banReason: string;
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  banDate: Date | null;
+  @Column({ type: 'character varying', nullable: true })
+  banReason: string | null;
 
   @OneToMany(() => Session, (s) => s.user)
   sessions: Session[];

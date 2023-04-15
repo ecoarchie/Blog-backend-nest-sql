@@ -53,14 +53,35 @@ export class UsersService {
     await this.sessionsRepository.deleteSession(validSession.id);
   }
 
-  async createNewUser(dto: CreateUserInputDto) {
-    const userId = await this.usersRepository.createUser(dto);
+  async createNewUser(dto: CreateUserInputDto): Promise<User['id']> {
+    const passHash = await this.hashPassword(dto.password);
+    const userId = await this.usersRepository.createUser({
+      login: dto.login,
+      passwordHash: passHash,
+      email: dto.email,
+    });
     await this.usersRepository.createConfirmationRecord(userId);
     return userId;
   }
 
   async banUnbanUser(userId: string, banUserDto: BanUserDto) {
-    await this.usersRepository.updateUserBanInfo(userId, banUserDto);
+    let isBanned: boolean;
+    let banReason: string | null;
+    let banDate: Date | null;
+
+    isBanned = banUserDto.isBanned;
+    if (!banUserDto.isBanned) {
+      banReason = null;
+      banDate = null;
+    } else {
+      banReason = banUserDto.banReason;
+      banDate = new Date();
+    }
+    await this.usersRepository.updateUserBanInfo(userId, {
+      isBanned,
+      banReason,
+      banDate,
+    });
 
     await this.sessionsRepository.deleteAllUserSessions(userId);
     //TODO finish this function
@@ -155,6 +176,10 @@ export class UsersService {
       return false;
     }
     return true;
+  }
+
+  private async hashPassword(password: string) {
+    return await bcrypt.hash(password, 1);
   }
 
   async updateRecoveryCodeAndPassword(data: NewPasswordDto) {

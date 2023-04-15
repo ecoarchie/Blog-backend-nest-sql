@@ -41,7 +41,7 @@ export class UsersRepository {
   }
 
   async createConfirmationRecord(userId: string) {
-    const data = await this.regConfirmationRepo.create({ userId });
+    const data = this.regConfirmationRepo.create({ userId });
     await this.regConfirmationRepo.save(data);
   }
 
@@ -52,70 +52,64 @@ export class UsersRepository {
     );
   }
 
-  async createUser(dto: CreateUserInputDto): Promise<User['id']> {
-    const insQuery = `
-  INSERT INTO public.users(
-	login, "passwordHash", email)
-	VALUES ($1, $2, $3);
-  `;
+  async createUser(dto: Partial<User>): Promise<User['id']> {
+    //   const insQuery = `
+    // INSERT INTO public.users(
+    // login, "passwordHash", email)
+    // VALUES ($1, $2, $3);
+    // `;
 
-    const passHash = await this.hashPassword(dto.password);
-    const insVals = [dto.login, passHash, dto.email];
-    const insertRes = await this.dataSource.query(insQuery, insVals);
-    const query = `
-    SELECT * FROM public.users
-    WHERE login = $1 AND email = $2
-    `;
-    const values = [dto.login, dto.email];
-    const user = await this.dataSource.query(query, values);
-    return user[0].id;
+    //   const insVals = [dto.login, passHash, dto.email];
+    //   const insertRes = await this.dataSource.query(insQuery, insVals);
+    //   const query = `
+    //   SELECT * FROM public.users
+    //   WHERE login = $1 AND email = $2
+    //   `;
+    //   const values = [dto.login, dto.email];
+    //   const user = await this.dataSource.query(query, values);
+    //   return user[0].id;
+    const user = this.usersTRepo.create(dto);
+    const result = await this.usersTRepo.save(user);
+    return result.id;
   }
 
   async deleteUserById(id: string): Promise<User['id'] | null> {
-    const searchQuery = `
-      SELECT id FROM public.users
-	    WHERE id = $1;
-    `;
-    const user = await this.dataSource.query(searchQuery, [id]);
-    if (user.length === 0) return null;
+    // const searchQuery = `
+    //   SELECT id FROM public.users
+    //   WHERE id = $1;
+    // `;
+    // const user = await this.dataSource.query(searchQuery, [id]);
+    // if (user.length === 0) return null;
 
-    const deleteQuery = `
-      DELETE FROM public.users
-	    WHERE id = $1;
-    `;
-    await this.dataSource.query(deleteQuery, [id]);
-    await this.sessionsRepository.deleteAllUserSessions(user.id);
-
-    return user[0].id;
+    // const deleteQuery = `
+    //   DELETE FROM public.users
+    //   WHERE id = $1;
+    // `;
+    // await this.dataSource.query(deleteQuery, [id]);
+    // await this.sessionsRepository.deleteAllUserSessions(user.id);
+    const user = await this.usersTRepo.findOneBy({ id });
+    if (!user) return null;
+    const userId = user.id;
+    await this.usersTRepo.remove(user);
+    return userId;
   }
 
   async updateUserBanInfo(
     userId: string,
-    banUserDto: BanUserDto,
+    banInfo: Pick<User, 'isBanned' | 'banDate' | 'banReason'>,
   ): Promise<void> {
-    let isBanned: boolean;
-    let banReason: string | null;
-    let banDate: Date | null;
-
-    isBanned = banUserDto.isBanned;
-    if (!banUserDto.isBanned) {
-      banReason = null;
-      banDate = null;
-    } else {
-      banReason = banUserDto.banReason;
-      banDate = new Date();
-    }
-    const updateQuery = `
-      UPDATE public.users
-	      SET "isBanned"=$1, "banDate"=$2, "banReason"=$3
-	      WHERE id = $4;
-    `;
-    await this.dataSource.query(updateQuery, [
-      isBanned,
-      banDate,
-      banReason,
-      userId,
-    ]);
+    // const updateQuery = `
+    //   UPDATE public.users
+    //     SET "isBanned"=$1, "banDate"=$2, "banReason"=$3
+    //     WHERE id = $4;
+    // `;
+    // await this.dataSource.query(updateQuery, [
+    //   isBanned,
+    //   banDate,
+    //   banReason,
+    //   userId,
+    // ]);
+    await this.usersTRepo.update({ id: userId }, banInfo);
   }
 
   async setNewPasswordRecoveryCode(userId: string) {
@@ -248,9 +242,5 @@ export class UsersRepository {
       banReason: user.banReason,
       banDate: user.banDate,
     };
-  }
-
-  async hashPassword(password: string) {
-    return await bcrypt.hash(password, 1);
   }
 }

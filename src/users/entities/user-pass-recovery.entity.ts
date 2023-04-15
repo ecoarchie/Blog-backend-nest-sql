@@ -10,7 +10,7 @@ import { User } from './user.entity';
 
 @Entity('user_pass_recovery')
 export class UserPasswordRecovery {
-  @OneToOne(() => User, (user) => user.passRecovery)
+  @OneToOne(() => User, (user) => user.passRecovery, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: string;
 
