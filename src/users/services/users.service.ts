@@ -133,8 +133,11 @@ export class UsersService {
         user.id,
       );
     }
+    console.log(user);
+    console.log(confirmInfo);
     let newConfirmationCode = null;
-    if (user && confirmInfo && confirmInfo.codeIsConfirmed) {
+    if (user && confirmInfo && !confirmInfo.codeIsConfirmed) {
+      console.log('here');
       newConfirmationCode = uuidv4();
       confirmInfo.code = newConfirmationCode;
       this.usersRepository.updateEmailConfirmationCode(confirmInfo);
