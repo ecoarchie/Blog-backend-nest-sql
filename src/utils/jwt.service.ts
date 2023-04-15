@@ -4,16 +4,24 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class JwtService {
   async createJwtAccessToken(userId: string) {
-    const token = jwt.sign({ userId: userId }, process.env.SECRET as jwt.Secret, {
-      expiresIn: '8h',
-    });
+    const token = jwt.sign(
+      { userId: userId },
+      process.env.SECRET as jwt.Secret,
+      {
+        expiresIn: 10,
+      },
+    );
     return token;
   }
 
   async createJwtRefresh(userId: string, deviceId: string) {
-    const token = jwt.sign({ userId, deviceId }, process.env.SECRET as jwt.Secret, {
-      expiresIn: '10h',
-    });
+    const token = jwt.sign(
+      { userId, deviceId },
+      process.env.SECRET as jwt.Secret,
+      {
+        expiresIn: 20,
+      },
+    );
     return token;
   }
 
@@ -27,7 +35,10 @@ export class JwtService {
   }
 
   async getExpDateFromRefreshToken(refreshToken: string) {
-    const tokenRes: any = jwt.verify(refreshToken, process.env.SECRET as jwt.Secret);
+    const tokenRes: any = jwt.verify(
+      refreshToken,
+      process.env.SECRET as jwt.Secret,
+    );
     return tokenRes.exp;
   }
 }

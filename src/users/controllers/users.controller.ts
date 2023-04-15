@@ -36,7 +36,7 @@ export class UsersController {
     const users = await this.usersQueryRepository.findAll(userPaginatorQuery);
     return users;
   }
-  //
+
   @Post()
   async create(@Body() dto: CreateUserInputDto) {
     const newUserId = await this.userService.createNewUser(dto);
