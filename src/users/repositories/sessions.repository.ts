@@ -142,10 +142,11 @@ export class SessionsRepository {
           userId,
         },
       });
+      console.log(session);
       return session;
     } catch (error) {
       console.log(error);
-      return null;
+      throw new UnauthorizedException();
     }
   }
 
@@ -160,6 +161,12 @@ export class SessionsRepository {
 
     // `;
     const sessionFound = await this.sessionTRepository.find({
+      select: {
+        ip: true,
+        title: true,
+        lastActiveDate: true,
+        deviceId: true,
+      },
       where: {
         userId,
       },
