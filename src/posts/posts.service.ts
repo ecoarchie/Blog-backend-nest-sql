@@ -93,6 +93,7 @@ export class PostsService {
       blogId,
       paginator,
     );
+    // console.log(posts);
     if (posts.length === 0) throw new NotFoundException();
     const totalCount = await this.postsQueryRepository.countAllPostsForBlog(
       blogId,
@@ -116,6 +117,7 @@ export class PostsService {
       page: paginator.pageNumber,
       pageSize: paginator.pageSize,
       totalCount,
+      // items: posts,
       items: this.toPostsViewModel(posts, usersReactions, newestLikes),
     };
   }
@@ -129,11 +131,11 @@ export class PostsService {
       return {
         id: post.id,
         title: post.title,
-        shortDescription: post.shortDescription,
+        shortDescription: post.short_description,
         content: post.content,
-        blogId: post.blogId,
+        blogId: post.blog_id,
         blogName: post.blogName,
-        createdAt: post.createdAt,
+        createdAt: post.created_at,
         extendedLikesInfo: {
           likesCount: Number(post.likesCount),
           dislikesCount: Number(post.dislikesCount),

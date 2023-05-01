@@ -8,7 +8,7 @@ export class CommentsPaginator {
   @IsOptional()
   sortBy = 'createdAt';
 
-  @IsIn(['asc', 'desc'])
+  @IsIn(['asc', 'desc', 'DESC', 'ASC'])
   @IsOptional()
   sortDirection: SortDirection = 'DESC';
 

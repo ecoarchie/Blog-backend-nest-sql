@@ -10,8 +10,8 @@ export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
   async findPostById(postId: string) {
     const query = `
-    SELECT blogposts.id, title, "shortDescription", "content", "blogId", blogposts."createdAt", blogs."name" "blogName" FROM public.blogposts
-    LEFT JOIN blogs ON blogs.id=blogposts."blogId"
+    SELECT blogposts.id, title, short_description, content, blog_id, blogposts.created_at, blogs.name "blogName" FROM public.blogposts
+    LEFT JOIN blogs ON blogs.id=blogposts.blog_id
     WHERE blogposts.id=$1
 `;
     const result = await this.dataSource.query(query, [postId]);
@@ -37,7 +37,7 @@ export class PostsRepository {
   async getUsersReactions(currentUserId: string, postIds: any[]) {
     const query = `
       SELECT * FROM public."postsReactions"
-      WHERE "userId"=$1 AND "postId" = ANY($2)
+      WHERE "user_id"=$1 AND "post_id" = ANY($2)
     `;
     const res = await this.dataSource.query(query, [currentUserId, postIds]);
     return res;

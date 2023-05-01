@@ -46,14 +46,14 @@ export class CommentsService {
       );
     if (!comment) return null;
 
-    const currentUserReaction =
-      await this.commentsRepository.checkUserReactionForOneComment(
-        commentId,
-        currentUserId,
-      );
-    console.log(currentUserReaction);
-    comment.myStatus = currentUserReaction;
-    return this.toViewModel(comment);
+    // const currentUserReaction =
+    //   await this.commentsRepository.checkUserReactionForOneComment(
+    //     commentId,
+    //     currentUserId,
+    //   );
+    // console.log(currentUserReaction);
+    // comment.myStatus = currentUserReaction;
+    return this.toViewModel(comment, currentUserId);
   }
 
   async findCommentsForPost(
@@ -67,11 +67,11 @@ export class CommentsService {
       postId,
       commentsPaginator,
     );
-    const commentsWithReactions =
-      await this.commentsRepository.checkUserReactionForManyComments(
-        comments,
-        currentUserId,
-      );
+    // const commentsWithReactions =
+    //   await this.commentsRepository.checkUserReactionForManyComments(
+    //     comments,
+    //     currentUserId,
+    //   );
     const totalCount = await this.commentsRepository.getCommentsQtyForPost(
       postId,
     );
@@ -81,7 +81,7 @@ export class CommentsService {
       page: commentsPaginator.pageNumber,
       pageSize: commentsPaginator.pageSize,
       totalCount,
-      items: commentsWithReactions.map(this.toViewModel),
+      items: comments.map((c) => this.toViewModel(c, currentUserId)),
     };
   }
 
@@ -93,11 +93,11 @@ export class CommentsService {
       await this.commentsRepository.findAllCommentsForNotBannedBlogs(
         commentsPaginator,
       );
-    const commentsWithReactions =
-      await this.commentsRepository.checkUserReactionForManyComments(
-        comments,
-        currentUserId,
-      );
+    // const commentsWithReactions =
+    //   await this.commentsRepository.checkUserReactionForManyComments(
+    //     comments,
+    //     currentUserId,
+    //   );
     const totalCount =
       await this.commentsRepository.getCommentsQtyForNotBannedBlogs();
     const pagesCount = Math.ceil(totalCount / commentsPaginator.pageSize);
@@ -106,7 +106,9 @@ export class CommentsService {
       page: commentsPaginator.pageNumber,
       pageSize: commentsPaginator.pageSize,
       totalCount,
-      items: commentsWithReactions.map(this.toViewModelWithPostInfo),
+      items: comments.map((c) =>
+        this.toViewModelWithPostInfo(c, currentUserId),
+      ),
     };
   }
   async deleteCommentById(commentId: string, currentUserId: string) {
@@ -114,9 +116,12 @@ export class CommentsService {
       await this.commentsRepository.findCommentWithCommentatorInfoById(
         commentId,
       );
+    console.log(comment);
     if (!comment) throw new NotFoundException();
 
-    if (comment.commentatorId !== currentUserId) throw new ForbiddenException();
+    console.log(currentUserId);
+    if (comment.commentator.id !== currentUserId)
+      throw new ForbiddenException();
     await this.commentsRepository.deleteById(commentId);
   }
 
@@ -131,7 +136,8 @@ export class CommentsService {
       );
     if (!comment) throw new NotFoundException();
 
-    if (comment.commentatorId !== currentUserId) throw new ForbiddenException();
+    if (comment.commentator.id !== currentUserId)
+      throw new ForbiddenException();
     await this.commentsRepository.updateContent(commentId, content);
   }
 
@@ -145,12 +151,12 @@ export class CommentsService {
         commentId,
       );
     if (!comment) throw new NotFoundException();
-    const currentReaction =
-      await this.commentsRepository.checkUserReactionForOneComment(
-        commentId,
-        currentUserId,
-      );
-    if (currentReaction === likeStatus) return;
+    // const currentReaction =
+    //   await this.commentsRepository.checkUserReactionForOneComment(
+    //     commentId,
+    //     currentUserId,
+    //   );
+    // if (currentReaction === likeStatus) return;
 
     // let reactionUpdate: ReactionUpdate;
     // if (likeStatus === 'None') {
@@ -189,6 +195,7 @@ export class CommentsService {
     //   commentId,
     //   reactionUpdate,
     // );
+
     await this.commentsRepository.updateCommentsReactions(
       commentId,
       currentUserId,
@@ -196,43 +203,55 @@ export class CommentsService {
     );
   }
 
-  private toViewModel(comment: CommentViewModel) {
+  private toViewModel(comment: any, userId: string) {
     return {
       id: comment.id,
       content: comment.content,
       commentatorInfo: {
-        userId: comment.commentatorId,
-        userLogin: comment.commentatorLogin,
+        userId: comment.commentator.id,
+        userLogin: comment.commentator.login,
       },
       createdAt: comment.createdAt,
       likesInfo: {
-        likesCount: Number(comment.likesCount),
-        dislikesCount: Number(comment.dislikesCount),
-        myStatus: comment.myStatus,
+        likesCount: comment.reactions?.filter(
+          (r: any) => r?.reaction === 'Like',
+        ).length,
+        dislikesCount: comment.reactions.filter(
+          (r: any) => r.reaction === 'Dislike',
+        ).length,
+        myStatus:
+          comment.reactions.find((r: any) => r?.userId === userId)?.reaction ||
+          'None',
       },
     };
   }
 
-  private toViewModelWithPostInfo(comment: CommentViewModelWithPostInfo) {
+  private toViewModelWithPostInfo(comment: any, userId: string) {
     return {
       id: comment.id,
       content: comment.content,
       commentatorInfo: {
-        userId: comment.commentatorId,
-        userLogin: comment.commentatorLogin,
+        userId: comment.commentator.id,
+        userLogin: comment.commentator.login,
       },
       createdAt: comment.createdAt,
       postInfo: {
         id: comment.postId,
-        title: comment.title,
-        blogId: comment.blogId,
-        blogName: comment.blogName,
+        title: comment.post.title,
+        blogId: comment.post.blog.id,
+        blogName: comment.post.blog.name,
       },
-      likesInfo: {
-        likesCount: Number(comment.likesCount),
-        dislikesCount: Number(comment.dislikesCount),
-        myStatus: comment.myStatus,
-      },
+      // likesInfo: {
+      //   likesCount: comment.reactions?.filter(
+      //     (r: any) => r?.reaction === 'Like',
+      //   ).length,
+      //   dislikesCount: comment.reactions?.filter(
+      //     (r: any) => r?.reaction === 'Dislike',
+      //   ).length,
+      //   myStatus:
+      //     comment?.reactions.find((r: any) => r?.userId === userId)?.reaction ||
+      //     'None',
+      // },
     };
   }
 }

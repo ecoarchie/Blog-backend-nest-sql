@@ -35,14 +35,12 @@ export class BlogsPublicController {
     @Param('blogId') blogId: string,
     @Query() paginator: PostPaginator,
     @CurrentUser('id') currentUserId: string,
-    @Res() res: Response,
-    @Req() req: Request,
   ) {
     const posts = await this.postsService.findAllPostsForBlog(
       blogId,
       paginator,
       currentUserId,
     );
-    res.send(posts);
+    return posts;
   }
 }

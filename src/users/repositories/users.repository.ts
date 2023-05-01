@@ -208,7 +208,7 @@ export class UsersRepository {
   async findBannedUserForBlog(blogId: string, userId: string) {
     const query = `
       SELECT * FROM public.banned_users_for_blogs
-      WHERE "userId"=$1 AND "blogId"=$2
+      WHERE "user_id"=$1 AND "blog_id"=$2
     `;
 
     const bannedUser = await this.dataSource.query(query, [userId, blogId]);
